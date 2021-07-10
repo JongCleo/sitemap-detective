@@ -1,10 +1,24 @@
-import sys
+import os, sys
 import csv
 import requests
 from bs4 import BeautifulSoup as bs
 import uuid
 import re
 from usp.tree import sitemap_tree_for_homepage
+import logging
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+        logging.disable(logging.CRITICAL)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
+        logging.disable(logging.NOTSET)
+
 
 ########################################################
 # Get scraper input, load sites into memory
@@ -71,7 +85,8 @@ for site in input_urls:
         print(e)
 
     # get sitemap, look for match in sitemap
-    tree = sitemap_tree_for_homepage(prependHttp(site))
+    with HiddenPrints():
+        tree = sitemap_tree_for_homepage(prependHttp(site))
     for page in tree.all_pages():
         for term in page_list:
             if (term in page.url):
