@@ -7,7 +7,6 @@ import re
 from usp.tree import sitemap_tree_for_homepage
 import logging
 
-
 class HiddenPrints:
     def __enter__(self):
         self._original_stdout = sys.stdout
@@ -24,11 +23,11 @@ class HiddenPrints:
 # Get scraper input, load sites into memory
 
 if (True):
-    path_to_csv = "test.csv"
+    path_to_csv = "input/test.csv"
     term_list = ["connect", "integration"]
     page_list = ["connect", "integration"]
 else:
-    path_to_csv = input('What is your file called?\n').strip()
+    path_to_csv = "input/" + input('What is your file called?\n').strip()
 
     path_to_csv = path_to_csv + ".csv" if ".csv" not in path_to_csv else path_to_csv
 
@@ -72,8 +71,8 @@ for site in input_urls:
 
     # look for terms in homepage
     try:
-        r = requests.get(prependHttp(site))
-        soup = bs(r.content)
+        r = requests.get(prependHttp(site), headers={'User-Agent': 'Mozilla/5.0'})
+        soup = bs(r.content, features="html.parser")
 
         for term in term_list:
             if (len(soup(text=re.compile(term))) > 0):
