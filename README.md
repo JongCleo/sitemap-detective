@@ -1,12 +1,15 @@
+## Set Up
+`python3 -m venv venv`
+`pip install -r requirements.txt`
 ## TODO
-
+- accept email
+- performance
+ error handling
+- logging
 - : Sanitize Inputs
   https://blog.sqreen.com/developer-security-best-practices-how-to-validate-input-data-in-python/
-- accept email
-performance
-- OOP ize
-- concurrent
+
+- concurrency
 - prerender pages
-- logging
 - make it a flask endpoint
 - persist to DB

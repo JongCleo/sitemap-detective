@@ -2,7 +2,6 @@ import os, sys
 import csv
 import requests
 from bs4 import BeautifulSoup as bs
-import uuid
 import re
 from usp.tree import sitemap_tree_for_homepage
 import logging
@@ -20,32 +19,27 @@ class HiddenPrints:
 
 
 class Scraper:
-    def __init__(self, test_mode):        
+    def __init__(self, test_mode, output_path, file_path, term_list, page_list):        
         ########################################################
-        # Get scraper input, load sites into memory
-        path_to_csv = None
-        term_list = []
-        page_list = []
-        
+        # Get scraper input, load sites into memory              
         if (test_mode):
-            path_to_csv = "input/test.csv"
+            path_to_csv = "test_data/test.csv"
             term_list = ["connect", "integration"]
             page_list = ["connect", "integration"]
         else:
-            path_to_csv = "input/" + input('What is your file called?\n').strip()
-            path_to_csv = path_to_csv + ".csv" if ".csv" not in path_to_csv else path_to_csv
+            path_to_csv = file_path            
 
             term_list = [
                 x.strip()
-                for x in input('Enter comma separated terms to look for:\n').split(",")
+                for x in term_list
             ]
             page_list = [
-                x.strip() for x in input(
-                    'Enter comma separated page names to look for:\n').split(",")
+                x.strip() for x in page_list
             ]
         self.path_to_csv = path_to_csv
         self.term_list = term_list
         self.page_list = page_list
+        self.output_path = output_path
 
     def processFile(self):
         self.__cleanOutput()
@@ -54,12 +48,11 @@ class Scraper:
 
         with open(self.path_to_csv) as f:
             input_urls = f.read().splitlines()
-                
-        output_name = "output_csv_" + str(uuid.uuid1()) + ".csv"
+                          
         header = ['sites'] + list(map(lambda term: "term_" + term, self.term_list)) + list(
             map(lambda page: "page_" + page, self.page_list))
 
-        f = open('output/' + output_name, 'w')
+        f = open(self.output_path, 'w')
         writer = csv.writer(f)
         writer.writerow(header)
         
