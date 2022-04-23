@@ -35,7 +35,7 @@ class Job:
         self.exact_page = exact_page
 
 
-def process_file(job) -> None:
+def process_file(job: Job) -> None:
     print("reading in input urls")
     input_urls = __get_urls(job.filename)
     print("preparing file")
@@ -44,16 +44,25 @@ def process_file(job) -> None:
     with open(path_to_output, "a") as f:
         writer = csv.writer(f)
 
-        for site in input_urls:
-            site = __prepend_http(site)
+        for input_url in input_urls:
+            input_url = __prepend_http(input_url)
+            if not __is_valid_url(input_url):
+                writer.writerow(
+                    [input_url]
+                    + ["N/A" for i in range(len(job.term_list))]
+                    + ["N/A" for i in range(len(job.page_list))]
+                )
+                continue
             print("looking for terms in home page...")
-            term_exist_list = __find_terms_on_homepage(site, job)
+            term_exist_list = __find_terms_on_homepage(input_url, job)
             print("looking for pages in sitemap...")
-            page_exist_dict = __find_pages_in_sitemap(site, job)
-            writer.writerow([site] + term_exist_list + list(page_exist_dict.values()))
+            page_exist_dict = __find_pages_in_sitemap(input_url, job)
+            writer.writerow(
+                [input_url] + term_exist_list + list(page_exist_dict.values())
+            )
 
 
-def __get_urls(filename):
+def __get_urls(filename: str):
     cwd = os.path.abspath(os.path.dirname(__file__))
     path_to_file = os.path.join(cwd, "../uploads", filename)
     with open(path_to_file) as f:
@@ -62,7 +71,7 @@ def __get_urls(filename):
 
 
 # method generates headers and writes lines to output file and returns file name
-def __make_output_file(job):
+def __make_output_file(job: Job):
     cwd = os.path.abspath(os.path.dirname(__file__))
     path_to_output = os.path.join(
         cwd, "../output", f"{job.filename.rsplit('.',1)[0]}_{uuid.uuid4().hex}.csv"
@@ -81,7 +90,7 @@ def __make_output_file(job):
     return path_to_output
 
 
-def __find_terms_on_homepage(site, job):
+def __find_terms_on_homepage(site: str, job: Job):
     term_exist_list = []
     try:
         with HTMLSession() as session:
@@ -99,7 +108,7 @@ def __find_terms_on_homepage(site, job):
     return term_exist_list
 
 
-def __find_pages_in_sitemap(site, job):
+def __find_pages_in_sitemap(site: str, job: Job):
     page_exist_dict = {pg: "False" for pg in job.page_list}
 
     with HiddenPrints():
@@ -121,10 +130,22 @@ def __find_pages_in_sitemap(site, job):
     return page_exist_dict
 
 
-def __prepend_http(url):
+def __prepend_http(url: str):
     if not re.match("(?:http|ftp|https)://", url):
         return "http://{}".format(url)
     return url
+
+
+def __is_valid_url(url: str):
+    with HTMLSession() as session:
+        try:
+            r = session.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            if r.status_code == 200:
+                return True
+            else:  # valid domain but failed request TODO: notion of retries
+                return False
+        except:  # invalid domain, connection error
+            return False
 
 
 def clean_output_directory():
