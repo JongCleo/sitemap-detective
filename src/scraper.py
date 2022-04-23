@@ -1,5 +1,4 @@
 import cProfile
-from curses import termattrs
 import os, sys
 import pstats
 import csv
@@ -122,6 +121,9 @@ def __find_pages_in_sitemap(site: str, job: Job):
             potential_match[1:] if potential_match[0] == "/" else potential_match
         )
         for search_term in page_exist_dict:
+            if search_term in potential_match:
+                print(search_term)
+                print(potential_match)
             if (job.exact_page and search_term == potential_match) or (
                 not job.exact_page and search_term in potential_match
             ):
@@ -165,7 +167,7 @@ def clean_output_directory():
 
 def main():
     clean_output_directory()
-    filename = "test.csv"
+    filename = "small_test.csv"
     term_list = ["connect", "integration"]
     page_list = ["connect", "integration"]
 
