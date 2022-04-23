@@ -1,4 +1,5 @@
 import cProfile
+from curses import termattrs
 import os, sys
 import pstats
 import csv
@@ -24,27 +25,48 @@ class HiddenPrints:
 
 
 class Job:
-    def __init__(self, filename, term_list, page_list):
+    def __init__(
+        self, filename, term_list, page_list, case_sensitive=False, exact_page=False
+    ):
         self.filename = filename
         self.term_list = [x.strip() for x in term_list]
         self.page_list = [x.strip() for x in page_list]
+        self.case_sensitive = case_sensitive
+        self.exact_page = exact_page
 
 
-def process_file(job):
+def process_file(job) -> None:
+    print("reading in input urls")
+    input_urls = __get_urls(job.filename)
+    print("preparing file")
+    path_to_output = __make_output_file(job)
 
-    ####### Get Path to file
-    # TODO: abstract the reading process away from local vs cloud
+    with open(path_to_output, "a") as f:
+        writer = csv.writer(f)
+
+        for site in input_urls:
+            site = __prepend_http(site)
+            print("looking for terms in home page...")
+            term_exist_list = __find_terms_on_homepage(site, job)
+            print("looking for pages in sitemap...")
+            page_exist_dict = __find_pages_in_sitemap(site, job)
+            writer.writerow([site] + term_exist_list + list(page_exist_dict.values()))
+
+
+def __get_urls(filename):
     cwd = os.path.abspath(os.path.dirname(__file__))
-    path_to_file = os.path.join(cwd, "../uploads", job.filename)
-    path_to_output = os.path.join(
-        cwd, "../output", f"{job.filename}_{uuid.uuid4().hex}"
-    )
-
-    ###### Load urls in Memory
+    path_to_file = os.path.join(cwd, "../uploads", filename)
     with open(path_to_file) as f:
         input_urls = f.read().splitlines()
+    return input_urls
 
-    ##### Scaffold the Output CSV
+
+# method generates headers and writes lines to output file and returns file name
+def __make_output_file(job):
+    cwd = os.path.abspath(os.path.dirname(__file__))
+    path_to_output = os.path.join(
+        cwd, "../output", f"{job.filename.rsplit('.',1)[0]}_{uuid.uuid4().hex}.csv"
+    )
     # [sites, term_a, term_b, page_a, page_b]
     headers = (
         ["sites"]
@@ -56,39 +78,47 @@ def process_file(job):
         writer = csv.writer(f)
         writer.writerow(headers)
 
-        # Process URLs
-        for site in input_urls:
-            term_exist_list = []
-            page_exist_dict = {pg: "False" for pg in job.page_list}
-            site = __prepend_http(site)
+    return path_to_output
 
-            # Look for terms in homepage
-            try:
-                session = HTMLSession()
-                r = session.get(site, headers={"User-Agent": "Mozilla/5.0"})
-                r.html.render(timeout=20)
 
-                for term in job.term_list:
-                    if term in r.html.html:
-                        term_exist_list.append("True")
-                    else:
-                        term_exist_list.append("False")
+def __find_terms_on_homepage(site, job):
+    term_exist_list = []
+    try:
+        with HTMLSession() as session:
+            r = session.get(site, headers={"User-Agent": "Mozilla/5.0"})
+            r.html.render(timeout=15)
+            for term in job.term_list:
+                if term in r.html.html:
+                    term_exist_list.append("True")
+                else:
+                    term_exist_list.append("False")
 
-            except requests.exceptions.RequestException as e:
-                print(e)
+    except requests.exceptions.RequestException as e:
+        print(e)
 
-            # Look for pages in sitemap
-            with HiddenPrints():
-                tree = sitemap_tree_for_homepage(site)
-            for page in tree.all_pages():
-                search_term = urlparse(page.url).path
+    return term_exist_list
 
-                search_term = search_term[1:] if search_term[0] == "/" else search_term
-                if search_term in job.page_list:
-                    page_exist_dict[search_term] = "True"
 
-            # write to file from memory
-            writer.writerow([site] + term_exist_list + list(page_exist_dict.values()))
+def __find_pages_in_sitemap(site, job):
+    page_exist_dict = {pg: "False" for pg in job.page_list}
+
+    with HiddenPrints():
+        try:
+            tree = sitemap_tree_for_homepage(site)
+        except:
+            print("Failed to retrieve sitemap")
+    for page in tree.all_pages():
+        potential_match = urlparse(page.url).path
+        potential_match = (
+            potential_match[1:] if potential_match[0] == "/" else potential_match
+        )
+        for search_term in page_exist_dict:
+            if (job.exact_page and search_term == potential_match) or (
+                not job.exact_page and search_term in potential_match
+            ):
+                page_exist_dict[search_term] = "True"
+
+    return page_exist_dict
 
 
 def __prepend_http(url):
@@ -113,25 +143,20 @@ def clean_output_directory():
 
 
 def main():
-    filename = input("What is your file called?\n").strip()
-    filename = filename + ".csv" if ".csv" not in filename else filename
-
-    term_list = [
-        x.strip()
-        for x in input("Enter comma separated terms to look for:\n").split(",")
-    ]
-
-    page_list = [
-        x.strip()
-        for x in input("Enter comma separated page names to look for:\n").split(",")
-    ]
+    clean_output_directory()
+    filename = "test.csv"
+    term_list = ["connect", "integration"]
+    page_list = ["connect", "integration"]
 
     job = Job(filename, term_list, page_list)
-    profile = cProfile.Profile()
-    profile.runcall(process_file, job)
-    ps = pstats.Stats(profile)
-    ps.sort_stats("cumtime")
-    ps.print_stats(20)
+
+    # Act
+    process_file(job)
+    # profile = cProfile.Profile()
+    # profile.runcall(process_file, job)
+    # ps = pstats.Stats(profile)
+    # ps.sort_stats("cumtime")
+    # ps.print_stats(20)
 
 
 if __name__ == "__main__":

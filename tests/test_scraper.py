@@ -16,3 +16,6 @@ def test_scraper():
     process_file(job)
 
     # Assert
+    # select only file in output directory
+    ## confirm that the headers is correct
+    ## confirm that the terms and pages are present

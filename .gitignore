@@ -138,6 +138,6 @@ dmypy.json
 cython_debug/
 
 # Project-specific
-output/*
+output/
 
 .vscode/
