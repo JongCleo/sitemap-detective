@@ -1,5 +1,6 @@
 import cProfile
 import os, sys
+import multiprocessing as mp
 import pstats
 import csv
 import uuid
@@ -9,6 +10,7 @@ from usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
+import time
 
 
 class HiddenPrints:
@@ -35,6 +37,8 @@ class Job:
 
 
 def process_file(job: Job) -> None:
+    # pool = mp.Pool(mp.cpu_count())
+
     print("reading in input urls")
     input_urls = __get_urls(job.filename)
     print("preparing file")
@@ -173,8 +177,11 @@ def main():
 
     job = Job(filename, term_list, page_list)
 
-    # Act
+    start_time = time.time()
     process_file(job)
+    end_time = time.time()
+    print("Done in {:.4f} seconds".format(start_time - end_time))
+
     # profile = cProfile.Profile()
     # profile.runcall(process_file, job)
     # ps = pstats.Stats(profile)
