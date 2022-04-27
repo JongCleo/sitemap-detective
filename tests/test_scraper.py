@@ -1,6 +1,6 @@
-from src.scraper import process_file, clean_output_directory, Job
+from src.scraper import process_file, Job
+from src.helper_functions import clean_output_directory
 import os
-
 
 def test_small_sample():
     # Arrange
@@ -23,14 +23,16 @@ def test_small_sample():
 
     with open(os.path.join(output_dir, output_file)) as f:
         ## confirm that the headers is correct
-        headers = f.readline().replace("\n", "")
-        hublio = f.readline().replace("\n", "")
-        attera = f.readline().replace("\n", "")
-        expected_headers = (
-            "sites,term_connect,term_integration,page_connect,page_integration"
-        )
-        expected_hublio = "http://www.hublio.com,True,False,False,False"
-        expected_attera = "http://www.atera.com,True,True,True,True"
-        assert expected_headers == headers
-        assert expected_hublio == hublio
-        assert expected_attera == attera
+        lines = f.read().splitlines()
+        for line in lines:
+            peek_value = line.split(",")[0]
+
+            if peek_value == "sites":
+                assert "sites,term_connect,term_integration,page_connect,page_integration" == line
+            elif peek_value == "http://www.hublio.com":
+                assert "http://www.hublio.com,True,False,False,False" == line
+            elif peek_value == "http://www.atera.com":
+                assert "http://www.atera.com,True,True,True,True" == line            
+            else:
+                pass
+                
