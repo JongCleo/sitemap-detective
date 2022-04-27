@@ -1,8 +1,10 @@
 import os, sys
+import multiprocessing as mp
 import csv
 import uuid
 import requests
 from usp.tree import sitemap_tree_for_homepage
+from usp.exceptions import TimeoutException
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
@@ -32,32 +34,71 @@ class Job:
         self.exact_page = exact_page
 
 
-def process_file(job: Job) -> None:
+def concurrent_process_file(job: Job) -> None:
 
     print("reading in input urls")
     input_urls = __get_urls(job.filename)
     print("preparing file")
     path_to_output = __make_output_file(job)
 
-    with open(path_to_output, "a") as f:
-        writer = csv.writer(f)
+    # Stuff for Concurrency
+    manager = mp.Manager()
+    job_queue = manager.Queue()
+    pool = mp.Pool()
+    sub_jobs = []
 
-        for input_url in input_urls:
-            input_url = __prepend_http(input_url)
-            if not __is_valid_url(input_url):
-                writer.writerow(
-                    [input_url]
-                    + ["N/A" for i in range(len(job.term_list))]
-                    + ["N/A" for i in range(len(job.page_list))]
-                )
-                continue
-            print("looking for terms in home page...")
-            term_exist_list = __find_terms_on_homepage(input_url, job)
-            print("looking for pages in sitemap...")
-            page_exist_dict = __find_pages_in_sitemap(input_url, job)
-            writer.writerow(
-                [input_url] + term_exist_list + list(page_exist_dict.values())
-            )
+    # Put listener to work first
+    pool.apply_async(
+        listener,
+        (
+            job_queue,
+            path_to_output,
+        ),
+    )
+
+    for input_url in input_urls:
+        sub_job = pool.apply_async(process_url, (input_url, job, job_queue))
+        sub_jobs.append(sub_job)
+
+    for sub_job in sub_jobs:
+        sub_job.get()
+
+    # now we are done, kill the listener
+    job_queue.put("kill")
+    pool.close()
+    pool.join()
+
+
+def listener(job_queue, filename):
+    """listens for messages on the queue, writes to file."""
+
+    with open(filename, "a") as f:
+        while True:
+            m = job_queue.get()
+            if m == "kill":
+                break
+            f.write(str(m) + "\n")
+
+
+def process_url(input_url: str, job: Job, job_queue):
+    """find term and page matches for the url"""
+
+    input_url = __prepend_http(input_url)
+    if not __is_valid_url(input_url):
+        return (
+            [input_url]
+            + ["N/A" for i in range(len(job.term_list))]
+            + ["N/A" for i in range(len(job.page_list))]
+        )
+
+    print("looking for terms in home page...")
+    term_exist_list = __find_terms_on_homepage(input_url, job)
+    print("looking for pages in sitemap...")
+    page_exist_dict = __find_pages_in_sitemap(input_url, job)
+
+    res = ",".join([input_url] + term_exist_list + list(page_exist_dict.values()))
+    job_queue.put(res)
+    return res
 
 
 def __get_urls(filename: str):
@@ -68,8 +109,10 @@ def __get_urls(filename: str):
     return input_urls
 
 
-# method generates headers and writes lines to output file and returns file name
 def __make_output_file(job: Job):
+    """
+    generates headers and writes to output file and returns file name
+    """
     cwd = os.path.abspath(os.path.dirname(__file__))
     path_to_output = os.path.join(
         cwd, "../output", f"{job.filename.rsplit('.',1)[0]}_{uuid.uuid4().hex}.csv"
@@ -90,18 +133,23 @@ def __make_output_file(job: Job):
 
 def __find_terms_on_homepage(site: str, job: Job):
     term_exist_list = []
-    try:
-        with HTMLSession() as session:
+
+    with HTMLSession() as session:
+        try:
             r = session.get(site, headers={"User-Agent": "Mozilla/5.0"})
+        except requests.exceptions.RequestException as e:
+            print(e)
+        try:
             r.html.render(timeout=15)
             for term in job.term_list:
                 if term in r.html.html:
                     term_exist_list.append("True")
                 else:
                     term_exist_list.append("False")
-
-    except requests.exceptions.RequestException as e:
-        print(e)
+        except:
+            print("Likely timed out")
+            for term in job.term_list:
+                term_exist_list.append("N/A")
 
     return term_exist_list
 
@@ -114,6 +162,7 @@ def __find_pages_in_sitemap(site: str, job: Job):
             tree = sitemap_tree_for_homepage(site)
         except:
             print("Failed to retrieve sitemap")
+
     print("searching sitemap")
     for page in tree.all_pages():
         potential_match = urlparse(page.url).path
