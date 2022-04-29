@@ -1,5 +1,5 @@
 
-from scraper import process_file, Job
+from scraper import Job, process_file
 from helper_functions import clean_output_directory
 import time
 

@@ -1,4 +1,5 @@
 import os, sys
+import re
 import multiprocessing as mp
 import csv
 import uuid
@@ -7,10 +8,11 @@ from usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
-from helper_functions import __prepend_http, __is_valid_url
+from helper_functions import __is_valid_url
 
 
 class HiddenPrints:
+    """ context provider to prevent the Ultimate Sitemap Parser library from spamming stdout """
     def __enter__(self):
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, "w")
@@ -23,9 +25,19 @@ class HiddenPrints:
 
 
 class Job:
+    """ ADT containing filename and customizations for processing"""
     def __init__(
-        self, filename, term_list, page_list, case_sensitive=False, exact_page=False
+        self, filename:str , term_list:list, page_list:list, case_sensitive:bool = False, exact_page:bool = False
     ):
+        """_summary_
+
+        Args:
+            filename (str): Name of file to be processed
+            term_list (list): List of keywords to search in homepages
+            page_list (list): List of /subpages to search in sitemap 
+            case_sensitive (bool, optional): Determines case sensitivity while searching term_list terms in process_file().                 
+            exact_page (bool, optional): Accepts substrings if True while searching page_list pages.
+        """
         self.filename = filename
         self.term_list = [x.strip() for x in term_list]
         self.page_list = [x.strip() for x in page_list]
@@ -34,21 +46,24 @@ class Job:
 
 
 def process_file(job: Job) -> None:
+    """ Checks a list of domains for the existence of certain pages and keywords in each domains' sitemaps
 
-    print("reading in input urls")
+    Args:
+        job (Job): the job object containing the customization details of the job
+    """
+
     input_urls = __get_urls(job.filename)
-    print("preparing file")
     path_to_output = __make_output_file(job)
 
-    # Stuff for Concurrency
+    # Parallelism  setup for performance
     manager = mp.Manager()
     job_queue = manager.Queue()
     pool = mp.Pool()
     sub_jobs = []
 
-    # Put listener to work first
+    # Dedicated process for writing to output file
     pool.apply_async(
-        listener,
+        __listener,
         (
             job_queue,
             path_to_output,
@@ -56,21 +71,25 @@ def process_file(job: Job) -> None:
     )
 
     for input_url in input_urls:
-        sub_job = pool.apply_async(process_url, (input_url, job, job_queue))
+        sub_job = pool.apply_async(__process_url, (input_url, job, job_queue))
         sub_jobs.append(sub_job)
 
     for sub_job in sub_jobs:
         sub_job.get()
 
-    # now we are done, kill the listener
+    # Done, kill the listener
     job_queue.put("kill")
     pool.close()
     pool.join()
 
 
-def listener(job_queue, filename):
-    """listens for messages on the queue, writes to file."""
+def __listener(job_queue: mp.Queue, filename:str) -> None:
+    """ Continously write results from the other Processes calling process_url() to the output CSV.        
 
+    Args:
+        job_queue (mp.Queue): queue of jobs that process_url() are passing results to
+        filename (str): output csv filename
+    """
     with open(filename, "a") as f:
         while True:
             m = job_queue.get()
@@ -79,16 +98,25 @@ def listener(job_queue, filename):
             f.write(str(m) + "\n")
 
 
-def process_url(input_url: str, job: Job, job_queue):
-    """find term and page matches for the url"""
+def __process_url(input_url: str, job: Job, job_queue:mp.Queue) -> str:
+    """ Searches for terms and page matches for given input_url and writes result to the job_queue
 
-    input_url = __prepend_http(input_url)
+    Args:
+        input_url (str): the url to search sitemaps in
+        job (Job): object describing customizations for processing logic
+        job_queue (mp.Queue): queue to pass finished jobs to _listener()
+
+    Returns:
+        str: comma separated row of boolean values indicating whether search terms
+        and pages were found for the given input_url. The order corresponds to the headers in __make_output_file()
+    """
+        
     if not __is_valid_url(input_url):
-        return (
-            [input_url]
+        res = ",".join([input_url]
             + ["N/A" for i in range(len(job.term_list))]
-            + ["N/A" for i in range(len(job.page_list))]
-        )
+            + ["N/A" for i in range(len(job.page_list))])
+        job_queue.put(res)
+        return res
 
     print("looking for terms in home page...")
     term_exist_list = __find_terms_on_homepage(input_url, job)
@@ -100,11 +128,24 @@ def process_url(input_url: str, job: Job, job_queue):
     return res
 
 
-def __get_urls(filename: str):
+def __get_urls(filename: str) -> list:
+    """ Parses the file-to-be-processed into a list of urls
+
+    Args:
+        filename (str): The uploaded file; A single column csv of urls. 
+
+    Returns:
+        _type_: list of stringified urls_
+    """
     cwd = os.path.abspath(os.path.dirname(__file__))
     path_to_file = os.path.join(cwd, "../uploads", filename)
     with open(path_to_file) as f:
-        input_urls = f.read().splitlines()
+        input_urls = []
+        for line in f.read().splitlines():
+            if not re.match("(?:http|ftp|https)://", line): 
+                input_urls.append("http://{}".format(line))
+            else:
+                input_urls.append(line)
     return input_urls
 
 

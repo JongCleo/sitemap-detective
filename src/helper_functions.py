@@ -1,13 +1,5 @@
 import os
-import re
 from requests_html import HTMLSession
-
-
-def __prepend_http(url: str):
-    if not re.match("(?:http|ftp|https)://", url):
-        return "http://{}".format(url)
-    return url
-
 
 def __is_valid_url(url: str):
     with HTMLSession() as session:
