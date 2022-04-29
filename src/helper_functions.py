@@ -1,17 +1,6 @@
 import os
 from requests_html import HTMLSession
 
-def __is_valid_url(url: str):
-    with HTMLSession() as session:
-        try:
-            r = session.get(url, headers={"User-Agent": "Mozilla/5.0"})
-            if r.status_code == 200:
-                return True
-            else:  # valid domain but failed request TODO: notion of retries
-                return False
-        except:  # invalid domain, connection error
-            return False
-
 
 def clean_output_directory():
     cwd = os.path.abspath(os.path.dirname(__file__))

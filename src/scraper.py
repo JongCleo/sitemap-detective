@@ -8,7 +8,6 @@ from usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
-from helper_functions import __is_valid_url
 
 
 class HiddenPrints:
@@ -148,16 +147,20 @@ def __get_urls(filename: str) -> list:
                 input_urls.append(line)
     return input_urls
 
+def __make_output_file(job: Job) -> str:
+    """Generates headers, writes to output csv and returns file name
 
-def __make_output_file(job: Job):
-    """
-    generates headers and writes to output file and returns file name
+    Args:
+        job (Job): Job object containing the terms and pages used in headers
+
+    Returns:
+        str: Name of output csv file which is named and structed based on Job attributes.
     """
     cwd = os.path.abspath(os.path.dirname(__file__))
     path_to_output = os.path.join(
         cwd, "../output", f"{job.filename.rsplit('.',1)[0]}_{uuid.uuid4().hex}.csv"
     )
-    # [sites, term_a, term_b, page_a, page_b]
+    
     headers = (
         ["sites"]
         + list(map(lambda term: "term_" + term, job.term_list))
@@ -171,7 +174,17 @@ def __make_output_file(job: Job):
     return path_to_output
 
 
-def __find_terms_on_homepage(site: str, job: Job):
+def __find_terms_on_homepage(site: str, job: Job) -> list:
+    """ Searches homepage of site for specified keywords
+
+    Args:
+        site (str): url of site to be searched
+        job (Job): ADT containing the keywords to search for
+
+    Returns:
+        list: list of boolean terms indicating presence of each keyword, 
+        corresponding to the header in __make_output_file()
+    """
     term_exist_list = []
 
     with HTMLSession() as session:
@@ -194,7 +207,17 @@ def __find_terms_on_homepage(site: str, job: Job):
     return term_exist_list
 
 
-def __find_pages_in_sitemap(site: str, job: Job):
+def __find_pages_in_sitemap(site: str, job: Job) -> dict:
+    """Searches sitemap(s) of site for specified subpages
+
+    Args:
+        site (str): url of site to be searched
+        job (Job): ADT containing the subpages to search for
+
+    Returns:
+        dict: dict of boolean terms indicating presence of each subpage, 
+        corresponding to the header in __make_output_file()
+    """
     page_exist_dict = {pg: "False" for pg in job.page_list}
     print("loading sitemap")
     with HiddenPrints():
@@ -221,3 +244,22 @@ def __find_pages_in_sitemap(site: str, job: Job):
                 page_exist_dict[search_term] = "True"
 
     return page_exist_dict
+
+def __is_valid_url(url: str) -> bool:
+    """ makes a test request against URL to see if it exists (returns a 200)
+
+    Args:
+        url (str): url to be tested
+
+    Returns:
+        bool: returns true if the request was successful
+    """
+    with HTMLSession() as session:
+        try:
+            r = session.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            if r.status_code == 200:
+                return True
+            else:  # valid domain but failed request TODO: notion of retries
+                return False
+        except:  # invalid domain, connection error
+            return False
