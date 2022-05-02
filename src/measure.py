@@ -1,4 +1,4 @@
-from scraper import Job, process_file
+from scraper import Job
 from helper_functions import clean_output_directory
 import time
 
@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     # Pool
     start_time = time.time()
-    process_file(file_job)
+    file_job.process_file()
     end_time = time.time()
     print("Multicore done in {:.4f} seconds".format(end_time - start_time))
     # Multicore done in 27.6035 seconds
