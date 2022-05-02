@@ -1,10 +1,13 @@
 import os
-from requests_html import HTMLSession
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ["csv"]
 
 
 def clean_output_directory():
     cwd = os.path.abspath(os.path.dirname(__file__))
-    path_to_output = os.path.join(cwd, "../output")
+    path_to_output = os.path.join(cwd, "./output")
     output_files = os.listdir(path_to_output)
 
     if len(output_files) >= 1:
