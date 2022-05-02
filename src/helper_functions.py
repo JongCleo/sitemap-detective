@@ -28,8 +28,7 @@ def is_valid_url(url: str) -> bool:
 
 
 def clean_output_directory():
-    cwd = os.path.abspath(os.path.dirname(__file__))
-    path_to_output = os.path.join(cwd, "./output")
+    path_to_output = get_output_directory()
     output_files = os.listdir(path_to_output)
 
     if len(output_files) >= 1:
@@ -40,3 +39,15 @@ def clean_output_directory():
                     os.unlink(file_path)
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
+
+
+def get_upload_directory():
+    cwd = os.path.abspath(os.path.dirname(__file__))
+    path_to_uploads = os.path.join(cwd, "./uploads")
+    return path_to_uploads
+
+
+def get_output_directory():
+    cwd = os.path.abspath(os.path.dirname(__file__))
+    path_to_output = os.path.join(cwd, "./output")
+    return path_to_output

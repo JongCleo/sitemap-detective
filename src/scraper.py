@@ -8,7 +8,7 @@ from usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
-from helper_functions import is_valid_url
+from helper_functions import is_valid_url, get_upload_directory, get_output_directory
 
 
 class HiddenPrints:
@@ -95,8 +95,7 @@ class Job:
         Returns:
             _type_: list of stringified urls_
         """
-        cwd = os.path.abspath(os.path.dirname(__file__))
-        path_to_file = os.path.join(cwd, "./uploads", self.filename)
+        path_to_file = get_upload_directory()
         with open(path_to_file) as f:
             input_urls = []
             for line in f.read().splitlines():
@@ -112,9 +111,10 @@ class Job:
         Returns:
             str: Name of output csv file which is named and structed based on Job attributes.
         """
-        cwd = os.path.abspath(os.path.dirname(__file__))
+
         path_to_output = os.path.join(
-            cwd, "./output", f"{self.filename.rsplit('.',1)[0]}_{uuid.uuid4().hex}.csv"
+            get_output_directory(),
+            f"{self.filename.rsplit('.',1)[0]}_{uuid.uuid4().hex}.csv",
         )
         # [sites, term_a, term_b, page_a, page_b]
         headers = (
