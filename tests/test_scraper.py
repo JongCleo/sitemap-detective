@@ -1,6 +1,7 @@
-from src.scraper import process_file, Job
+from src.scraper import Job
 from src.helper_functions import clean_output_directory
 import os
+
 
 def test_small_sample():
     # Arrange
@@ -12,11 +13,11 @@ def test_small_sample():
     job = Job(filename, term_list, page_list)
 
     # Act
-    process_file(job)
+    job.process_file()
 
     # Assert
     cwd = os.path.abspath(os.path.dirname(__file__))
-    output_dir = os.path.join(cwd, "../output")
+    output_dir = os.path.join(cwd, "../src/output")
     output_file = [
         f for f in os.listdir(output_dir) if os.path.isfile(os.path.join(output_dir, f))
     ][0]
@@ -28,11 +29,13 @@ def test_small_sample():
             peek_value = line.split(",")[0]
 
             if peek_value == "sites":
-                assert "sites,term_connect,term_integration,page_connect,page_integration" == line
+                assert (
+                    "sites,term_connect,term_integration,page_connect,page_integration"
+                    == line
+                )
             elif peek_value == "http://www.hublio.com":
                 assert "http://www.hublio.com,True,False,False,False" == line
             elif peek_value == "http://www.atera.com":
-                assert "http://www.atera.com,True,True,True,True" == line            
+                assert "http://www.atera.com,True,True,True,True" == line
             else:
                 pass
-                
