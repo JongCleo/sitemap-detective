@@ -1,5 +1,5 @@
-from src.scraper import Job
-from src.helper_functions import clean_output_directory
+from app.scraper import Job
+from app.helper_functions import clean_output_directory
 import os
 
 

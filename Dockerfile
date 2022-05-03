@@ -5,7 +5,9 @@ FROM python:3
 WORKDIR /code
 
 # copy and install the dependencies file to the working directory
-COPY requirements.txt ./
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY ./ ./

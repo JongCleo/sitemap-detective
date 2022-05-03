@@ -8,7 +8,7 @@ from usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
-from helper_functions import is_valid_url, get_upload_directory, get_output_directory
+from .helper_functions import is_valid_url, get_upload_directory, get_output_directory
 
 
 class HiddenPrints:
