@@ -16,7 +16,7 @@ from logging.handlers import RotatingFileHandler
 celery = Celery(
     __name__,
     broker=Config.CELERY_BROKER_URL,
-    result_backend=Config.CELERY_RESULT_BACKEND,
+    result_backend=Config.RESULT_BACKEND,
 )
 
 ### Application Factory
