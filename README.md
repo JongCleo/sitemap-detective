@@ -1,29 +1,29 @@
-# Website Filter
+# Website Filter/Validator/ Name TBD
 
-## How to use docker-compose locally for testing
+## Local Development Setup
 
-### To rebuild the images . Use `--no-cache` if you want to download everything again and start from scratch
-
-```
-docker-compose build --no-cache
-```
-
-### To bring up the services in detached mode
+Clone the repository, cd into it and run
 
 ```
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-### To shutdown service and clear out everything
+Test it out at http://localhost:5000. This project's root folder is mounted into the container so your code changes apply automatically.
+
+To shutdown service use the flag `--rmi all` to clear everthing or just `-v` for the volumes
 
 ```
-docker-compose down --rmi all
+docker-compose down
 ```
 
-### Handy command to restart just one container
+## Production
 
 ```
-docker-compose restart [container name]
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 ### Other items:
+
+```
+
+```
