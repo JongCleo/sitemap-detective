@@ -1,10 +1,11 @@
-from . import main_blueprint
-from flask import render_template, request, redirect, url_for, current_app
+from flask import render_template, request, redirect, url_for, current_app, Blueprint
 import os
 import uuid
-from ..helper_functions import allowed_file, get_output_directory, get_upload_directory
-from ..tasks import process_job
+from .helper_functions import allowed_file, get_output_directory, get_upload_directory
+from .tasks import process_job
+from .scraper import Job
 
+main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 # os.makedirs(uploads_dir, exists_ok=True)
 # os.makedirs(output_dir, exists_ok=True)
@@ -13,16 +14,16 @@ from ..tasks import process_job
 @main_blueprint.route("/")
 def get_home():
     current_app.logger.info("index page loading")
-    return render_template("main/index.html")  # why is this the path?
+    return render_template("index.html")  # why is this the path?
 
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
-    process_job.delay()
+    term_list = request.form["term_list"]
+    page_list = request.form["page_list"]
+    file = request.files["file_upload"]
+    process_job.delay(file.filename, term_list, page_list)
     # email = request.form["email"]
-    # term_list = request.form["term_list"]
-    # page_list = request.form["page_list"]
-    # file = request.files["fileupload"]
 
     # # check if the post request has the file part
     # if "file" not in request.files:

@@ -15,7 +15,7 @@ class Config:
 
     # Secrets for all environments
     CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-    RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+    RESULT_BACKEND = os.getenv("RESULT_BACKEND")
 
 
 class DevelopmentConfig(Config):

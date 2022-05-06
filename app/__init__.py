@@ -52,9 +52,9 @@ def create_app():
 
 ### Helper Functions ###
 def register_blueprints(app):
-    from app.main import main_blueprint
+    from app import views
 
-    app.register_blueprint(main_blueprint)
+    app.register_blueprint(views.main_blueprint)
 
 
 def register_error_handlers(app):

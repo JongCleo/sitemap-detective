@@ -1,6 +1,6 @@
 import os, sys
 import re
-import multiprocessing as mp
+import billiard as mp
 import csv
 import uuid
 import requests
@@ -95,7 +95,7 @@ class Job:
         Returns:
             _type_: list of stringified urls_
         """
-        path_to_file = get_upload_directory()
+        path_to_file = os.path.join(get_upload_directory(), self.filename)
         with open(path_to_file) as f:
             input_urls = []
             for line in f.read().splitlines():
