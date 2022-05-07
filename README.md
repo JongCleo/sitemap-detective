@@ -12,11 +12,8 @@ pip install -r requirements.txt
 
 ## Local Development
 
-run from a bash terminal
-
-```
- ./start.sh
-```
+run `./start.sh` from a bash terminal to start all services
+and run `./stop.sh` to stop all services
 
 Flask server is at http://localhost:5000
 Flower (Worker diagnostics) is at http://localhost:5555
