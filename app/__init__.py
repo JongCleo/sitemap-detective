@@ -125,12 +125,8 @@ def configure_logging(app):
 def register_database(app):
     from app import models
 
-    if Config.FLASK_ENV == "development":
-        db.drop_all()
-
-    db.init_app(app)
-    db.create_all()
-    db.session.commit()
+    with app.app_context():
+        db.init_app(app)
 
 
 def setup_depots(app):
