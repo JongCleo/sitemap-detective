@@ -3,7 +3,7 @@ import os
 import uuid
 from .helper_functions import allowed_file, get_output_directory, get_upload_directory
 from .tasks import process_job
-from .models import User, Job
+from .models import User, Job, get_or_create
 
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
@@ -21,13 +21,15 @@ def get_home():
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
-    # job = create or update Job in database
 
     # Parse and Validate Request
     term_list = request.form["term_list"]
     page_list = request.form["page_list"]
     email = request.form["email"]
     file = request.files.get("file_upload")
+
+    # job = create or update Job in database
+    user = get_or_create(User, email=email)
 
     if not file:
         pass
@@ -43,15 +45,15 @@ def process_upload():
     # Store File
 
     # Add Job
-    process_job.delay(file.filename, term_list, page_list)
+    # process_job.delay(file.filename, term_list, page_list)
 
     # if file and allowed_file(file.filename):
     #     file_path = os.path.join(get_upload_directory(), file.filename)
     # output_path = os.path.join(
     #     get_output_directory(), "output_csv_" + str(uuid.uuid1()) + ".csv"
     # )
-
-    return "nice"
+    current_app.logger.info(user)
+    return "true"
 
 
 # def send_email():

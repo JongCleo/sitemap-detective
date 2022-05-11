@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, current_app
 from datetime import datetime
 from . import db
 
@@ -27,3 +27,14 @@ class Job(db.Model):
 
     def __repr__(self):
         return "<Job %r>" % self.id
+
+
+def get_or_create(model, **kwargs):
+    instance = model.query.filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        instance = model(**kwargs)
+        db.session.add(instance)
+        db.session.commit()
+        return instance
