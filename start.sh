@@ -1,6 +1,8 @@
 #!/bin/bash
 export FLASK_ENV=development
 
+./stop.sh
+
 brew services start redis &
 flask run &
 watchmedo auto-restart -d ./ -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info &

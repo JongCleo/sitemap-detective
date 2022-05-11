@@ -3,8 +3,10 @@ import os
 import uuid
 from .helper_functions import allowed_file, get_output_directory, get_upload_directory
 from .tasks import process_job
-from .scraper import Job
+from .models import User, Job
 
+
+ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 # os.makedirs(uploads_dir, exists_ok=True)
@@ -19,28 +21,36 @@ def get_home():
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
+    # job = create or update Job in database
+
+    # Parse and Validate Request
     term_list = request.form["term_list"]
     page_list = request.form["page_list"]
-    file = request.files["file_upload"]
-    process_job.delay(file.filename, term_list, page_list)
-    # email = request.form["email"]
+    email = request.form["email"]
+    file = request.files.get("file_upload")
 
-    # # check if the post request has the file part
-    # if "file" not in request.files:
-    #     return "No file part"
-    # if file.filename == "":
-    #     return "No selected file"
+    if not file:
+        pass
+        # abort(HTTPStatus.BAD_REQUEST, 'no image file provided')
+
+    mime_types = set(file.content_type.split(","))
+    is_mime_type_allowed = any(mime_types.intersection(ACCEPTED_MIME_TYPES))
+
+    if not is_mime_type_allowed:
+        pass
+        # abort(HTTPStatus.BAD_REQUEST, f'allowed mimetypes are {IMAGE_MIME_TYPES}')
+
+    # Store File
+
+    # Add Job
+    process_job.delay(file.filename, term_list, page_list)
+
     # if file and allowed_file(file.filename):
     #     file_path = os.path.join(get_upload_directory(), file.filename)
     # output_path = os.path.join(
     #     get_output_directory(), "output_csv_" + str(uuid.uuid1()) + ".csv"
     # )
 
-    # Connect to db
-    # write file to bucket
-    # save Job to db
-
-    # file.save(os.path.join(get_upload_directory(), file.filename))
     return "nice"
 
 

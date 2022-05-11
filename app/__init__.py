@@ -2,15 +2,18 @@
 This contains the application factory for creating flask application instances.
 Using the application factory allows for the creation of flask applications configured 
 for different environments based on the value of the CONFIG_TYPE environment variable
+Based on https://github.com/angeuwase/production-flask-app-setup
 """
 
 import os
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
 from celery import Celery
 from config import Config
 import logging
 from flask.logging import default_handler
 from logging.handlers import RotatingFileHandler
+from depot.manager import DepotManager
 
 ### Instantiate Celery
 celery = Celery(
@@ -18,6 +21,9 @@ celery = Celery(
     broker=Config.CELERY_BROKER_URL,
     result_backend=Config.RESULT_BACKEND,
 )
+
+## Instantiate db
+db = SQLAlchemy()
 
 ### Application Factory
 def create_app():
@@ -38,6 +44,9 @@ def create_app():
 
     celery.Task = ContextTask
 
+    # Configure database
+    register_database(app)
+
     # Register blueprints
     register_blueprints(app)
 
@@ -46,6 +55,9 @@ def create_app():
 
     # Register error handlers
     register_error_handlers(app)
+
+    # Setup File storage
+    # setup_depots(app)
 
     return app
 
@@ -91,7 +103,9 @@ def configure_logging(app):
     app.logger.removeHandler(default_handler)
 
     # Create a file handler object
-    file_handler = RotatingFileHandler("flaskapp.log", maxBytes=16384, backupCount=20)
+    file_handler = RotatingFileHandler(
+        "logs/flaskapp.log", maxBytes=16384, backupCount=20
+    )
 
     # Set the logging level of the file handler object so that it logs INFO and up
     file_handler.setLevel(logging.INFO)
@@ -106,3 +120,32 @@ def configure_logging(app):
 
     # Add file handler object to the logger
     app.logger.addHandler(file_handler)
+
+
+def register_database(app):
+    from app import models
+
+    if Config.FLASK_ENV == "development":
+        db.drop_all()
+
+    db.init_app(app)
+    db.create_all()
+    db.session.commit()
+
+
+def setup_depots(app):
+    depot_name = "all_csvs"
+
+    if Config.FLASK_ENV == "development":
+        depot_config = {"depo.backend": "depot.io.memory.MemoryFileStorage"}
+    else:  # Production
+        depot_config = {
+            "depot.backend": "depot.io.boto3.S3Storage",
+            "depot.endpoint_url": "https://storage.googleapis.com",
+            "depot.access_key_id": app.config.get("GOOGLE_CLOUD_STORAGE_ACCESS_KEY"),
+            "depot.secret_access_key": app.config.get(
+                "GOOGLE_CLOUD_STORAGE_SECRET_KEY"
+            ),
+            "depot.bucket": app.config.get("GOOGLE_CLOUD_STORAGE_BUCKET"),
+        }
+    DepotManager.configure(depot_name, depot_config)
