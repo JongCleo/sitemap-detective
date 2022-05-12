@@ -1,10 +1,14 @@
 amqp==5.1.1
+anyascii==0.3.1
 appdirs==1.4.4
+argh==0.26.2
 async-timeout==4.0.2
 attrs==21.4.0
 beautifulsoup4==4.11.1
 billiard==3.6.4.0
 black==22.3.0
+boto3==1.22.9
+botocore==1.25.9
 bs4==0.0.1
 celery==5.2.6
 certifi==2021.10.8
@@ -16,7 +20,9 @@ click-repl==0.2.0
 cssselect==1.1.0
 Deprecated==1.2.13
 fake-useragent==0.1.11
+filedepot==0.8.0
 Flask==2.1.2
+Flask-SQLAlchemy==2.5.1
 flower==1.0.0
 gunicorn==20.1.0
 humanize==4.1.0
@@ -25,6 +31,7 @@ importlib-metadata==4.11.3
 iniconfig==1.1.1
 itsdangerous==2.1.2
 Jinja2==3.1.2
+jmespath==1.0.0
 kombu==5.2.4
 lxml==4.8.0
 MarkupSafe==2.1.1
@@ -36,6 +43,7 @@ platformdirs==2.5.2
 pluggy==1.0.0
 prometheus-client==0.14.1
 prompt-toolkit==3.0.29
+psycopg2==2.9.3
 py==1.11.0
 pyee==8.2.2
 pyparsing==3.0.8
@@ -45,11 +53,14 @@ pytest==7.1.2
 python-dateutil==2.8.2
 python-dotenv==0.20.0
 pytz==2022.1
+PyYAML==6.0
 redis==4.2.2
 requests==2.27.1
 requests-html==0.10.0
+s3transfer==0.5.2
 six==1.16.0
 soupsieve==2.3.2.post1
+SQLAlchemy==1.4.36
 tomli==2.0.1
 tornado==6.1
 tqdm==4.64.0
@@ -58,6 +69,7 @@ ultimate-sitemap-parser==0.5
 urllib3==1.26.9
 vine==5.0.0
 w3lib==1.22.0
+watchdog==2.1.7
 wcwidth==0.2.5
 websockets==10.3
 Werkzeug==2.1.2

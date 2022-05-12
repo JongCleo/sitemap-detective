@@ -5,7 +5,7 @@ export FLASK_ENV=development
 ./stop.sh
 
 # database set up and run services
-python ./app/application.py create_db &
+python ./utilities.py create_db &
 brew services start redis &
 flask run &
 watchmedo auto-restart -d ./ -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info &

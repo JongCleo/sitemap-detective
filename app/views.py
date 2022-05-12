@@ -21,14 +21,11 @@ def get_home():
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
-
-    # Parse and Validate Request
     term_list = request.form["term_list"]
     page_list = request.form["page_list"]
     email = request.form["email"]
     file = request.files.get("file_upload")
 
-    # job = create or update Job in database
     user = get_or_create(User, email=email)
 
     if not file:

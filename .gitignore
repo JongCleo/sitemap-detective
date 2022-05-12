@@ -143,3 +143,5 @@ output/
 .vscode/
 
 *.DS_Store
+
+*.db
