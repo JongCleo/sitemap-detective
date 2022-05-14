@@ -1,9 +1,19 @@
-from flask import render_template, request, redirect, url_for, current_app, Blueprint
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for,
+    current_app,
+    Blueprint,
+    abort,
+    jsonify,
+)
 import os
 import uuid
 from .helper_functions import allowed_file, get_output_directory, get_upload_directory
 from .tasks import process_job
-from .models import User, Job, get_or_create
+from .models import Job, User, UserSchema, JobSchema, get_or_create
+from http import HTTPStatus
 
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
@@ -26,20 +36,20 @@ def process_upload():
     email = request.form["email"]
     file = request.files.get("file_upload")
 
-    user = get_or_create(User, email=email)
+    ### Store file in gcloud
 
     if not file:
-        pass
-        # abort(HTTPStatus.BAD_REQUEST, 'no image file provided')
+        print(f"no file,{file}")
+        abort(HTTPStatus.BAD_REQUEST, "no file provided")
 
     mime_types = set(file.content_type.split(","))
     is_mime_type_allowed = any(mime_types.intersection(ACCEPTED_MIME_TYPES))
 
     if not is_mime_type_allowed:
-        pass
-        # abort(HTTPStatus.BAD_REQUEST, f'allowed mimetypes are {IMAGE_MIME_TYPES}')
+        abort(HTTPStatus.BAD_REQUEST, f"allowed mimetypes are {ACCEPTED_MIME_TYPES}")
 
-    # Store File
+    ### Database
+    user = get_or_create(User, email=email)
 
     # Add Job
     # process_job.delay(file.filename, term_list, page_list)
@@ -49,8 +59,8 @@ def process_upload():
     # output_path = os.path.join(
     #     get_output_directory(), "output_csv_" + str(uuid.uuid1()) + ".csv"
     # )
-    current_app.logger.info(user)
-    return "true"
+    serializable_user = UserSchema().dump(user)  # python class to python dictionary
+    return jsonify(serializable_user), HTTPStatus.CREATED
 
 
 # def send_email():

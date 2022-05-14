@@ -1,11 +1,10 @@
 from flask import Flask, current_app
-from dataclasses import dataclass
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from datetime import datetime
 from depot.fields.sqlalchemy import UploadedFileField
 from . import db
 
 
-@dataclass
 class User(db.Model):
     __tablename__ = "users"
 
@@ -16,7 +15,6 @@ class User(db.Model):
         return "<User %r>" % self.email
 
 
-@dataclass
 class Job(db.Model):
     __tablename__ = "jobs"
     id = db.Column(db.Integer, primary_key=True)
@@ -34,6 +32,20 @@ class Job(db.Model):
 
     def __repr__(self):
         return "<Job %r>" % self.id
+
+
+class UserSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        include_relationships = True
+        load_instance = True
+
+
+class JobSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Job
+        include_relationships = True
+        load_instance = True
 
 
 def get_or_create(model, **kwargs):
