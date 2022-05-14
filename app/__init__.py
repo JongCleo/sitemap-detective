@@ -22,7 +22,7 @@ celery = Celery(
     result_backend=Config.RESULT_BACKEND,
 )
 
-## Instantiate db
+### Instantiate db
 db = SQLAlchemy()
 
 ### Application Factory
@@ -57,7 +57,7 @@ def create_app():
     register_error_handlers(app)
 
     # Setup File storage
-    # setup_depots(app)
+    setup_depots(app)
 
     return app
 
@@ -130,11 +130,12 @@ def register_database(app):
 
 
 def setup_depots(app):
+
     depot_name = "all_csvs"
 
-    if Config.FLASK_ENV == "development":
-        depot_config = {"depo.backend": "depot.io.memory.MemoryFileStorage"}
-    else:  # Production
+    if app.config.get("FLASK_ENV") == "development":
+        depot_config = {"depot.backend": "depot.io.memory.MemoryFileStorage"}
+    else:
         depot_config = {
             "depot.backend": "depot.io.boto3.S3Storage",
             "depot.endpoint_url": "https://storage.googleapis.com",

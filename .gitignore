@@ -145,3 +145,4 @@ output/
 *.DS_Store
 
 *.db
+/logs

@@ -1,5 +1,4 @@
 #!/bin/bash
-export FLASK_ENV=development
 
 # clean up 
 ./stop.sh
