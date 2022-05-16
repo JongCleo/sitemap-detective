@@ -31,8 +31,8 @@ def get_home():
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
-    term_list = request.form["term_list"]
-    page_list = request.form["page_list"]
+    # term_list = request.form["term_list"]
+    # page_list = request.form["page_list"]
     email = request.form["email"]
     file = request.files.get("file_upload")
 
