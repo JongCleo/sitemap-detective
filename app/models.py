@@ -27,6 +27,9 @@ class Job(db.Model):
     celery_id = db.Column(db.Integer)
     # date finished
     input_file = db.Column(UploadedFileField())
+    term_list = db.Column(db.PickleType())
+    page_list = db.Column(db.PickleType())
+
     # output file
     # number of lines in input file
 

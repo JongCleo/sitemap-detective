@@ -14,13 +14,10 @@ from .helper_functions import allowed_file, get_output_directory, get_upload_dir
 from .tasks import process_job
 from .models import Job, User, UserSchema, JobSchema, get_or_create
 from http import HTTPStatus
-
+from app import db
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
-
-# os.makedirs(uploads_dir, exists_ok=True)
-# os.makedirs(output_dir, exists_ok=True)
 
 
 @main_blueprint.route("/")
@@ -31,12 +28,12 @@ def get_home():
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
-    # term_list = request.form["term_list"]
-    # page_list = request.form["page_list"]
+
+    ### Parse and Validate
+    term_list = request.form["term_list"]
+    page_list = request.form["page_list"]
     email = request.form["email"]
     file = request.files.get("file_upload")
-
-    ### Store file in gcloud
 
     if not file:
         print(f"no file,{file}")
@@ -48,19 +45,22 @@ def process_upload():
     if not is_mime_type_allowed:
         abort(HTTPStatus.BAD_REQUEST, f"allowed mimetypes are {ACCEPTED_MIME_TYPES}")
 
-    ### Database
+    ### Write Job to DB, Start Workflow
     user = get_or_create(User, email=email)
+    # create output file name, "output_csv_" + str(uuid.uuid1()) + ".csv"
+    job = Job(
+        user_id=user.id,
+        input_file=file,
+        term_list=term_list,
+        page_list=page_list,
+    )
+    # celery_id = process_job.delay(job.id)
+    # job.celery_id = celery_id
+    db.session.add(job)
+    db.session.commit()
 
-    # Add Job
-    # process_job.delay(file.filename, term_list, page_list)
-
-    # if file and allowed_file(file.filename):
-    #     file_path = os.path.join(get_upload_directory(), file.filename)
-    # output_path = os.path.join(
-    #     get_output_directory(), "output_csv_" + str(uuid.uuid1()) + ".csv"
-    # )
-    serializable_user = UserSchema().dump(user)  # python class to python dictionary
-    return jsonify(serializable_user), HTTPStatus.CREATED
+    serializable_job = JobSchema().dump(job)  # python class to python dictionary
+    return jsonify(serializable_job), HTTPStatus.CREATED
 
 
 # def send_email():
