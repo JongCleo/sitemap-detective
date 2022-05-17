@@ -146,3 +146,5 @@ def setup_depots(app):
             "depot.bucket": app.config.get("GOOGLE_CLOUD_STORAGE_BUCKET"),
         }
     DepotManager.configure(depot_name, depot_config)
+    # MWare to serve files
+    DepotManager.make_middleware(app.wsgi_app)

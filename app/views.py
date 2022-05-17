@@ -15,6 +15,7 @@ from .tasks import process_job
 from .models import Job, User, UserSchema, JobSchema, get_or_create
 from http import HTTPStatus
 from app import db
+from celery.result import AsyncResult
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
@@ -30,8 +31,16 @@ def get_home():
 def process_upload():
 
     ### Parse and Validate
-    term_list = request.form["term_list"]
-    page_list = request.form["page_list"]
+    term_list = [x.strip() for x in list(request.form["term_list"])]
+    page_list = [x.strip() for x in list(request.form["page_list"])]
+    case_sensitive = (
+        request.form["case_sensitive"]
+        if request.form["case_sensitive"] == None
+        else False
+    )
+    exact_page = (
+        request.form["exact_page"] if request.form["exact_page"] == None else False
+    )
     email = request.form["email"]
     file = request.files.get("file_upload")
 
@@ -47,20 +56,32 @@ def process_upload():
 
     ### Write Job to DB, Start Workflow
     user = get_or_create(User, email=email)
-    # create output file name, "output_csv_" + str(uuid.uuid1()) + ".csv"
+
     job = Job(
         user_id=user.id,
         input_file=file,
         term_list=term_list,
         page_list=page_list,
+        case_sensitive=case_sensitive,
+        exact_page=exact_page,
     )
-    # celery_id = process_job.delay(job.id)
-    # job.celery_id = celery_id
+    task = process_job.delay(job.id)
+    job.celery_id = task.id
     db.session.add(job)
     db.session.commit()
 
     serializable_job = JobSchema().dump(job)  # python class to python dictionary
     return jsonify(serializable_job), HTTPStatus.CREATED
+
+
+@main_blueprint.route("jobs/<id>", methods=["GET"])
+def get_job():
+    # Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
+    # job = Job.query.filter_by(id=id)
+    # res = AsyncResult(job.celery_id)
+    # first_or_404()
+    # parse, give back jsonified dump
+    pass
 
 
 # def send_email():

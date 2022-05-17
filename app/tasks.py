@@ -4,8 +4,8 @@ from .scraper import Job
 
 
 @celery.task(name="process_file")
-def process_job(filename, term_list, page_list):
-    job = Job(filename, term_list, page_list)
+def process_job(job_id):
+    job = Job(job_id)
     print("received!")
     job.process_file()
     return True
