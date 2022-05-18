@@ -5,7 +5,7 @@ from .scraper import Job
 
 @celery.task(name="process_file")
 def process_job(job_id):
+    print("received task, creating job")
     job = Job(job_id)
-    print("received!")
-    job.process_file()
+    # job.process_file()
     return True

@@ -24,12 +24,12 @@ class Job(db.Model):
     # backref creates the mirror property on the User class as "jobs"
 
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    celery_id = db.Column(db.Integer)
+    celery_id = db.Column(db.String)
     # date finished
     input_file = db.Column(UploadedFileField())
     term_list = db.Column(db.PickleType())
     page_list = db.Column(db.PickleType())
-    case_sensitive = db.Columnn(db.Boolean)
+    case_sensitive = db.Column(db.Boolean)
     exact_page = db.Column(db.Boolean)
 
     # output file

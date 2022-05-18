@@ -9,6 +9,7 @@ import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
 from .helper_functions import is_valid_url, get_upload_directory, get_output_directory
+from .models import Job as DBJob
 
 
 class HiddenPrints:
@@ -28,28 +29,20 @@ class HiddenPrints:
 class Job:
     """Class containing ADT for storing customizations and processing method"""
 
-    def __init__(
-        self,
-        filename: str,
-        term_list: list,
-        page_list: list,
-        case_sensitive: bool = False,
-        exact_page: bool = False,
-    ):
-        """_summary_
-
-        Args:
-            filename (str): Name of file to be processed
-            term_list (list): List of keywords to search in homepages
-            page_list (list): List of /subpages to search in sitemap
-            case_sensitive (bool, optional): Determines case sensitivity while searching term_list terms in process_file().
-            exact_page (bool, optional): Accepts substrings if True while searching page_list pages.
+    def __init__(self, job_id: str):
         """
-        self.filename = filename
-        self.term_list = [x.strip() for x in term_list]
-        self.page_list = [x.strip() for x in page_list]
-        self.case_sensitive = case_sensitive
-        self.exact_page = exact_page
+        Args:
+            job_id (str): DB id of Job object
+        """
+        db_job = DBJob.query.get(job_id)
+
+        self.output_file = None
+        # self.filename = filename
+        self.term_list = db_job.term_list
+        self.page_list = db_job.page_list
+        self.case_sensitive = db_job.case_sensitive
+        self.exact_page = db_job.exact_page
+        # load file onto disk
 
     def process_file(self) -> None:
         """Checks a list of domains for the existence of certain pages and keywords in each domains' sitemaps"""

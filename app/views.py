@@ -31,8 +31,8 @@ def get_home():
 def process_upload():
 
     ### Parse and Validate
-    term_list = [x.strip() for x in list(request.form["term_list"])]
-    page_list = [x.strip() for x in list(request.form["page_list"])]
+    term_list = [x.strip() for x in request.form["term_list"].split(",")]
+    page_list = [x.strip() for x in request.form["page_list"].split(",")]
     case_sensitive = (
         request.form["case_sensitive"]
         if request.form["case_sensitive"] == None
@@ -65,23 +65,25 @@ def process_upload():
         case_sensitive=case_sensitive,
         exact_page=exact_page,
     )
+    db.session.add(job)
+    db.session.commit()
+
     task = process_job.delay(job.id)
     job.celery_id = task.id
-    db.session.add(job)
     db.session.commit()
 
     serializable_job = JobSchema().dump(job)  # python class to python dictionary
     return jsonify(serializable_job), HTTPStatus.CREATED
 
 
-@main_blueprint.route("jobs/<id>", methods=["GET"])
-def get_job():
-    # Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
-    # job = Job.query.filter_by(id=id)
-    # res = AsyncResult(job.celery_id)
-    # first_or_404()
-    # parse, give back jsonified dump
-    pass
+# @main_blueprint.route("jobs/<id>", methods=["GET"])
+# def get_job():
+# Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
+# job = Job.query.filter_by(id=id)
+# res = AsyncResult(job.celery_id)
+# first_or_404()
+# parse, give back jsonified dump
+# pass
 
 
 # def send_email():
