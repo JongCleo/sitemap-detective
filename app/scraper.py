@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from requests_html import HTMLSession
 from .helper_functions import is_valid_url, get_upload_directory, get_output_directory
 from .models import Job as DBJob
+from depot.manager import DepotManager
 
 
 class HiddenPrints:
@@ -35,9 +36,10 @@ class Job:
             job_id (str): DB id of Job object
         """
         db_job = DBJob.query.get(job_id)
-
         self.output_file = None
-        # self.filename = filename
+        self.input_file = DepotManager.get_file(db_job.input_file.path)
+        print(self.input_file)
+        # get actual file and filename,
         self.term_list = db_job.term_list
         self.page_list = db_job.page_list
         self.case_sensitive = db_job.case_sensitive

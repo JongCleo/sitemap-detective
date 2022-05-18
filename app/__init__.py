@@ -134,7 +134,7 @@ def setup_depots(app):
     depot_name = "all_csvs"
 
     if app.config.get("FLASK_ENV") == "development":
-        depot_config = {"depot.backend": "depot.io.memory.MemoryFileStorage"}
+        depot_config = {"depot.storage_path": "/tmp/"}
     else:
         depot_config = {
             "depot.backend": "depot.io.boto3.S3Storage",
@@ -147,4 +147,4 @@ def setup_depots(app):
         }
     DepotManager.configure(depot_name, depot_config)
     # MWare to serve files
-    DepotManager.make_middleware(app.wsgi_app)
+    app.wsgi_app = DepotManager.make_middleware(app.wsgi_app)
