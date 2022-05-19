@@ -134,7 +134,8 @@ def setup_depots(app):
     depot_name = "all_csvs"
 
     if app.config.get("FLASK_ENV") == "development":
-        depot_config = {"depot.storage_path": "/tmp/"}
+        # storing on disk vs memory per https://github.com/amol-/depot/tree/master/examples/flask
+        depot_config = {"depot.storage_path": "./tmp/"}
     else:
         depot_config = {
             "depot.backend": "depot.io.boto3.S3Storage",

@@ -38,13 +38,11 @@ class Job:
         db_job = DBJob.query.get(job_id)
         self.output_file = None
         self.input_file = DepotManager.get_file(db_job.input_file.path)
-        print(self.input_file)
-        # get actual file and filename,
         self.term_list = db_job.term_list
         self.page_list = db_job.page_list
         self.case_sensitive = db_job.case_sensitive
         self.exact_page = db_job.exact_page
-        # load file onto disk
+        print(self.__get_urls())
 
     def process_file(self) -> None:
         """Checks a list of domains for the existence of certain pages and keywords in each domains' sitemaps"""
@@ -90,14 +88,15 @@ class Job:
         Returns:
             _type_: list of stringified urls_
         """
-        path_to_file = os.path.join(get_upload_directory(), self.filename)
-        with open(path_to_file) as f:
-            input_urls = []
-            for line in f.read().splitlines():
-                if not re.match("(?:http|ftp|https)://", line):
-                    input_urls.append("http://{}".format(line))
-                else:
-                    input_urls.append(line)
+
+        input_urls = []
+        for line in self.input_file.read().decode("UTF-8").splitlines():
+            if not re.match("(?:http|ftp|https)://", line):
+                input_urls.append("http://{}".format(line))
+            else:
+                input_urls.append(line)
+        self.input_file.close()
+
         return input_urls
 
     def __make_output_file(self) -> str:
