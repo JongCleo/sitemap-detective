@@ -1,18 +1,13 @@
 from flask import (
     render_template,
     request,
-    redirect,
-    url_for,
     current_app,
     Blueprint,
     abort,
     jsonify,
 )
-import os
-import uuid
-from .helper_functions import allowed_file, get_output_directory, get_upload_directory
 from .tasks import process_job
-from .models import Job, User, UserSchema, JobSchema, get_or_create
+from .models import Job, User, JobSchema, get_or_create
 from http import HTTPStatus
 from app import db
 from celery.result import AsyncResult
