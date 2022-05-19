@@ -31,8 +31,7 @@ class Job(db.Model):
     page_list = db.Column(db.PickleType())
     case_sensitive = db.Column(db.Boolean)
     exact_page = db.Column(db.Boolean)
-
-    # output file
+    output_file = db.Column(UploadedFileField)
     # number of lines in input file
 
     def __repr__(self):
