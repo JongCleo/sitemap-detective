@@ -29,8 +29,8 @@ class Job(db.Model):
     input_file = db.Column(UploadedFileField)
     term_list = db.Column(db.PickleType())
     page_list = db.Column(db.PickleType())
-    case_sensitive = db.Column(db.Boolean)
-    exact_page = db.Column(db.Boolean)
+    case_sensitive = db.Column(db.Boolean, default=False)
+    exact_page = db.Column(db.Boolean, default=False)
     output_file = db.Column(UploadedFileField)
     # number of lines in input file
 

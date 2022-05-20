@@ -24,13 +24,12 @@ def db(app):
 
     database.drop_all()
     database.create_all()
-    database.commit()
+    database.session.commit()
 
-    with app.app_context():
-        yield database
+    yield database
 
     database.drop_all()
-    database.commit()
+    database.session.commit()
 
 
 @pytest.fixture(scope="function")
