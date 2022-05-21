@@ -22,3 +22,8 @@ Flower (Worker diagnostics) is at http://localhost:5555
 
 `pytest {path/module_name.py}` to test a module
 add the `-v` flag for more verbosity or `-q` for less
+
+### Shortcuts
+
+`pytest tests/unit/test_scraper.py`
+`pytest tests/functional/test_views.py`

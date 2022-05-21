@@ -1,6 +1,8 @@
 from os import path
 import pytest
 from app import create_app, db as database
+from app.models import Job, User
+from tests import helpers
 
 
 @pytest.fixture(scope="session")
@@ -36,3 +38,25 @@ def db(app):
 def client(app):
 
     yield app.test_client()
+
+
+@pytest.fixture
+def user(db):
+    user = User(email="test@test.com")
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+@pytest.fixture
+def job(user, db):
+    input_file = helpers.load_binary_file("small_test.csv")
+    term_list = ["connect", "integration"]
+    page_list = ["connect", "integration"]
+
+    job = Job(
+        user_id=user.id, input_file=input_file, term_list=term_list, page_list=page_list
+    )
+    db.session.add(job)
+    db.session.commit()
+    return job

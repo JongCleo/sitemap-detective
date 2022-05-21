@@ -1,26 +1,10 @@
 from app.scraper import process_job
-from tests import helpers
 from app.models import Job, User
 from depot.manager import DepotManager
 import os
 
 
-def test_small_sample(db):
-    # Arrange
-
-    user = User(email="user@test.com")
-    db.session.add(user)
-    db.session.commit()
-
-    input_file = helpers.load_binary_file("small_test.csv")
-    term_list = ["connect", "integration"]
-    page_list = ["connect", "integration"]
-
-    job = Job(
-        user_id=user.id, input_file=input_file, term_list=term_list, page_list=page_list
-    )
-    db.session.add(job)
-    db.session.commit()
+def test_small_sample(job):
 
     # Act
     process_job(job.id)

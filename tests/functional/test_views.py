@@ -1,29 +1,39 @@
 from http import HTTPStatus
 from tests import helpers
+import json
 
 # Based on: https://github.dev/paulgoetze/flask-gcs-upload-example-app/blob/part-2/my_app/app.py
 
 
-def test_valid_job(client):
+def test_valid_job(client, db):
     """
     GIVEN a valid form submission
     WHEN form is submitted to the upload route
-    Then a success confirmation and jsonified job object is returned to the client
+    THEN return success confirmation and JSON serialized Job
     """
 
-    small_csv = helpers.load_file_data("small_test.csv")
+    # Arrange
+    data = {
+        "file_upload": helpers.load_file_data("small_test.csv"),
+        "email": "test@test.com",
+        "term_list": ["connect", "integration"],
+        "page_list": ["connect", "integration"],
+        "case_sensitive": False,
+        "exact_page": False,
+    }
 
     response = client.post(
         "/upload",
-        data={"file_upload": small_csv, "email": "tomato@gmail.com"},
+        data=data,
         content_type="multipart/form-data",
     )
 
     data = response.json
-    print(data)
-    assert response.status_code == HTTPStatus.CREATED
-    # assert file exists in object storage
-    # assert that a job was created in celery
+
+    assert response.status_code == HTTPStatus.CREATED  # happy path response
+    assert data["celery_id"]  # job was created in celery
+    assert data["input_file"]  # file in object storage
+
     # assert that email was sent
 
 
