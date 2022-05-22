@@ -19,7 +19,7 @@ from depot.manager import DepotManager
 celery = Celery(
     __name__,
     broker=Config.CELERY_BROKER_URL,
-    result_backend=Config.RESULT_BACKEND,
+    backend=Config.RESULT_BACKEND,
 )
 
 ### Instantiate db

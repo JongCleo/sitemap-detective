@@ -5,6 +5,8 @@ from flask import (
     Blueprint,
     abort,
     jsonify,
+    redirect,
+    url_for,
 )
 from .tasks import process_job
 from .models import Job, User, JobSchema, get_or_create
@@ -67,18 +69,24 @@ def process_upload():
     job.celery_id = task.id
     db.session.commit()
 
-    serializable_job = JobSchema().dump(job)  # python class to python dictionary
-    return jsonify(serializable_job), HTTPStatus.CREATED
+    # return 303, indicate POST acknowledgement
+    # Source: https://stackoverflow.com/questions/4584728/redirecting-with-a-201-created
+    return redirect(url_for("main.get_job", job_id=job.id)), HTTPStatus.SEE_OTHER
 
 
-# @main_blueprint.route("jobs/<id>", methods=["GET"])
-# def get_job():
-# Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
-# job = Job.query.filter_by(id=id)
-# res = AsyncResult(job.celery_id)
-# first_or_404()
-# parse, give back jsonified dump
-# pass
+@main_blueprint.route("/jobs/<job_id>", methods=["GET"])
+def get_job(job_id):
+    # Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
+    try:
+        job = Job.query.get(job_id)
+        status = process_job.AsyncResult(job.celery_id).status
+    except Exception as error:
+        current_app.logger.info(error)
+        abort(HTTPStatus.BAD_REQUEST, "job doesn't exist")
+
+    job_information = JobSchema().dump(job)  # python class to python dictionary
+    job_information.update({"status": status})
+    return jsonify(job_information), HTTPStatus.CREATED
 
 
 # def send_email():
