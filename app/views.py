@@ -8,11 +8,11 @@ from flask import (
     redirect,
     url_for,
 )
-from .tasks import process_job
+from .tasks import process_job, send_email, EmailType
 from .models import Job, User, JobSchema, get_or_create
 from http import HTTPStatus
 from app import db
-from celery.result import AsyncResult
+from celery import chain
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
@@ -51,7 +51,7 @@ def process_upload():
     if not is_mime_type_allowed:
         abort(HTTPStatus.BAD_REQUEST, f"allowed mimetypes are {ACCEPTED_MIME_TYPES}")
 
-    ### Write Job to DB, Start Workflow
+    ### Write Job to DB
     user = get_or_create(User, email=email)
 
     job = Job(
@@ -65,8 +65,13 @@ def process_upload():
     db.session.add(job)
     db.session.commit()
 
-    task = process_job.delay(job.id)
-    job.celery_id = task.id
+    ### Email User Status Page
+    status_page_link = request.base_url + f"/jobs/{job.id}"
+    send_email(EmailType.received, user.email, status_page_link)
+
+    ### Process File
+    chain = chain(process_job.s(job.id), send_email.s(user.email, status_page_link))()
+    job.celery_id = chain.parent.id
     db.session.commit()
 
     # return 303, indicate POST acknowledgement
