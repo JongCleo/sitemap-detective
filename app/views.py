@@ -87,37 +87,3 @@ def get_job(job_id):
     job_information = JobSchema().dump(job)  # python class to python dictionary
     job_information.update({"status": status})
     return jsonify(job_information), HTTPStatus.CREATED
-
-
-# def send_email():
-#     #define email properties: sender, recipient, content, and attachment
-#     message = Mail(
-#     from_email="placeholder",
-#     to_emails="TO_EMAIL",
-#     subject=f'File',
-#     html_content="""
-#     <strong>
-#     Average price is {}.
-#     Minimum price is {}.
-#     Maximum price is {}.
-#     Std is {}.
-#     </strong>
-#     """.format(mean_price, min_price, max_price, std_price))
-#     attachment = Attachment()
-#     attachment.file_content = FileContent(encoded)
-#     attachment.file_type = FileType('text/csv')
-#     attachment.file_name = FileName('scraped.csv')
-#     attachment.disposition = Disposition('attachment')
-#     attachment.content_id = ContentId('Example Content ID')
-#     message.attachment = attachment
-
-#     #sending out the email
-#     try:
-#       sg = SendGridAPIClient(SENDGRID_API_KEY)
-#       response = sg.send(message)
-#       print(response.status_code)
-#       print(response.body)
-#       print(response.headers)
-
-#     except Exception as e:
-#       print(e)
