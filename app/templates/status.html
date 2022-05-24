@@ -3,9 +3,9 @@
   <div class="w-1/2 bg-white rounded shadow-2xl p-8 m-4">
     <div>
       Job Status: {{job_information.status}} Job Id: {{job_information.id}} File
-      Name: {{job_information.input_file.filename}} {% if
+      Name: {{job_information.input_file_name}} {% if
       job_information.output_file is not none %} Output File:
-      {{job_information.output_file.filename}} {% endif %}
+      {{job_information.output_file_name}} {% endif %}
 
       <h1>Customizations</h1>
       Pages:{{job_information.page_list}} Keywords:

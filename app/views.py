@@ -93,8 +93,15 @@ def get_job(job_id):
         current_app.logger.info(error)
         abort(HTTPStatus.BAD_REQUEST, "job doesn't exist")
 
-    job_information = JobSchema().dump(job)  # python class to python dictionary
+    # Build response object
+    job_information = JobSchema().dump(job)
     job_information.update({"status": status})
+    job_information.update(
+        {
+            "output_file_name": job.output_file.filename,
+            "input_file_name": job.input_file.filename,
+        }
+    )
 
     return (
         render_template("status.html", job_information=job_information),
