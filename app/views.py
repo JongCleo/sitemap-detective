@@ -66,17 +66,21 @@ def process_upload():
     db.session.commit()
 
     ### Email User Status Page
-    status_page_link = request.base_url + f"/jobs/{job.id}"
+    status_page_link = url_for("home") + f"/jobs/{job.id}"
     send_email(EmailType.received, user.email, status_page_link)
 
     ### Process File
-    chain = chain(process_job.s(job.id), send_email.s(user.email, status_page_link))()
-    job.celery_id = chain.parent.id
+    task_chain = chain(
+        process_job.s(job.id), send_email.s(user.email, status_page_link)
+    )()
+
+    job.celery_id = task_chain.id
+    db.session.add(job)
     db.session.commit()
 
     # return 303, indicate POST acknowledgement
     # Source: https://stackoverflow.com/questions/4584728/redirecting-with-a-201-created
-    return redirect(url_for("main.get_job", job_id=job.id)), HTTPStatus.SEE_OTHER
+    return redirect(url_for("main.get_home", job_id=job.id)), HTTPStatus.SEE_OTHER
 
 
 @main_blueprint.route("/jobs/<job_id>", methods=["GET"])

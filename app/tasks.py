@@ -5,6 +5,13 @@ import sendgrid
 from sendgrid.helpers.mail import *
 import enum
 
+# Want to subclass string so it's celery compatible
+# Source: https://stackoverflow.com/questions/24481852/serialising-an-enum-member-to-json
+class EmailType(str, enum.Enum):
+    received = "received"
+    succeeded = "succeeded"
+    failed = "failed"
+
 
 @celery.task(name="process_file")
 def process_job(job_id):
@@ -13,18 +20,8 @@ def process_job(job_id):
     return EmailType.succeeded
 
 
-class EmailType(enum.Enum):
-    received = 1
-    succeeded = 2
-    failed = 3
-
-
 @celery.task(name="send_email")
 def send_email(email_type: EmailType, email: str, status_page_link: str):
-
-    print(
-        f"making sure sendgrid key is accessible from current app: {current_app.config['SENDGRID_API_KEY']}"
-    )
 
     # TODO: https://github.com/sendgrid/sendgrid-python/blob/main/use_cases/transactional_templates.md
     # Use transactional templates for dynamcisim
@@ -34,18 +31,24 @@ def send_email(email_type: EmailType, email: str, status_page_link: str):
 
     if email_type == EmailType.received:
         subject = "Your File is Being Processed"
-        content = Content("text/plain", "here is the link to your status page")
     elif email_type == EmailType.succeeded:
         subject = "Your File is Ready"
-        content = Content(
-            "text/plain", "here is the link where you can download your lead list!"
-        )
+        # content = Content(
+        #     "text/plain", "here is the link where you can download your lead list!"
+        # )
     else:
         pass
 
     mail = Mail(
-        from_email, to_email, subject, content, status_page_link=status_page_link
+        from_email,
+        to_email,
+        subject,
+        html_content="<strong>Your file is being processed. Or maybe it's done.</strong>",
     )
+    mail.dynamic_template_data = {
+        "status_page_link": f"{status_page_link}",
+    }
+    mail.template_id = "d-e74a9bbeb60047b5b294a3de5ad7c2be"
 
     try:
         response = sg.client.mail.send.post(request_body=mail.get())
