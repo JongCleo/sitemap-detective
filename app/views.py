@@ -4,7 +4,6 @@ from flask import (
     current_app,
     Blueprint,
     abort,
-    jsonify,
     redirect,
     url_for,
 )
@@ -21,7 +20,7 @@ main_blueprint = Blueprint("main", __name__, template_folder="templates")
 @main_blueprint.route("/")
 def get_home():
     current_app.logger.info("index page loading")
-    return render_template("index.html")  # why is this the path?
+    return render_template("index.html")
 
 
 @main_blueprint.route("/upload", methods=["POST"])
@@ -78,8 +77,7 @@ def process_upload():
     db.session.add(job)
     db.session.commit()
 
-    # return 303, indicate POST acknowledgement
-    # Source: https://stackoverflow.com/questions/4584728/redirecting-with-a-201-created
+    # 303 == POST acknowledgement, Src: https://stackoverflow.com/questions/4584728/redirecting-with-a-201-created
     return redirect(url_for("main.get_home", job_id=job.id)), HTTPStatus.SEE_OTHER
 
 
@@ -95,10 +93,11 @@ def get_job(job_id):
 
     # Build response object
     job_information = JobSchema().dump(job)
-    job_information.update({"status": status})
+
     job_information.update(
         {
-            "output_file_name": job.output_file.filename,
+            "status": status,
+            "output_file_name": job.output_file.filename,  # flattening bc Jinja can't parse nested props
             "input_file_name": job.input_file.filename,
         }
     )
