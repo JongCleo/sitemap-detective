@@ -26,11 +26,15 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    ## Email
     SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+    SENDGRID_FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL")
+    SENDGRID_TEMPLATE_ID = os.getenv("SENDGRID_TEMPLATE_ID")
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(base_dir, "database.db")
 
 

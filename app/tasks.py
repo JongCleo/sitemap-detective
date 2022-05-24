@@ -26,7 +26,7 @@ def send_email(email_type: EmailType, email: str, status_page_link: str):
     # TODO: https://github.com/sendgrid/sendgrid-python/blob/main/use_cases/transactional_templates.md
     # Use transactional templates for dynamcisim
     sg = sendgrid.SendGridAPIClient(api_key=current_app.config["SENDGRID_API_KEY"])
-    from_email = Email("leonardkim96@gmail.com")
+    from_email = Email(current_app.config["SENDGRID_FROM_EMAIL"])
     to_email = To(email)
 
     if email_type == EmailType.received:
@@ -48,7 +48,7 @@ def send_email(email_type: EmailType, email: str, status_page_link: str):
     mail.dynamic_template_data = {
         "status_page_link": f"{status_page_link}",
     }
-    mail.template_id = "d-e74a9bbeb60047b5b294a3de5ad7c2be"
+    mail.template_id = current_app.config["SENDGRID_TEMPLATE_ID"]
 
     try:
         response = sg.client.mail.send.post(request_body=mail.get())

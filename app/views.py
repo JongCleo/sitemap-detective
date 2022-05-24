@@ -66,7 +66,7 @@ def process_upload():
     db.session.commit()
 
     ### Email User Status Page
-    status_page_link = url_for("home") + f"/jobs/{job.id}"
+    status_page_link = url_for("main.get_home") + f"/jobs/{job.id}"
     send_email(EmailType.received, user.email, status_page_link)
 
     ### Process File
@@ -95,4 +95,8 @@ def get_job(job_id):
 
     job_information = JobSchema().dump(job)  # python class to python dictionary
     job_information.update({"status": status})
-    return jsonify(job_information), HTTPStatus.CREATED
+
+    return (
+        render_template("status.html", job_information=job_information),
+        HTTPStatus.CREATED,
+    )
