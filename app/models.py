@@ -1,4 +1,3 @@
-from flask import Flask, current_app
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from datetime import datetime
 from depot.fields.sqlalchemy import UploadedFileField
