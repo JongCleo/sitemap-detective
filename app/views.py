@@ -6,12 +6,14 @@ from flask import (
     abort,
     redirect,
     url_for,
+    Response,
 )
 from .tasks import process_job, send_email, EmailType
 from .models import Job, User, JobSchema, get_or_create
 from http import HTTPStatus
 from app import db
 from celery import chain
+from depot.manager import DepotManager
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
@@ -19,7 +21,7 @@ main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 @main_blueprint.route("/")
 def get_home():
-    current_app.logger.info("index page loading")
+    current_app.logger.info("home page loading")
     return render_template("index.html")
 
 
@@ -52,6 +54,7 @@ def process_upload():
 
     ### Write Job to DB
     user = get_or_create(User, email=email)
+    current_app.logger.info(f"Received Upload from User: {user.id}")
 
     job = Job(
         user_id=user.id,
@@ -83,6 +86,7 @@ def process_upload():
 
 @main_blueprint.route("/jobs/<job_id>", methods=["GET"])
 def get_job(job_id):
+    current_app.logger.info(f"Status page loading, job id: {job_id}")
     # Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
     try:
         job = Job.query.get(job_id)
@@ -105,4 +109,18 @@ def get_job(job_id):
     return (
         render_template("status.html", job_information=job_information),
         HTTPStatus.CREATED,
+    )
+
+
+@main_blueprint.route("/downloads/<job_id>", methods=["GET", "POST"])
+def download_output_file(job_id):
+    current_app.logger.info(f"Download requested for job id: {job_id}")
+    output_file_path = Job.query.get(job_id).output_file.path
+    output_file = DepotManager.get_file(output_file_path)
+
+    # not expecting big files.. should be fine to read into memory and hail mary w.o chunking
+    return Response(
+        output_file.read(),
+        mimetype="text/csv",
+        headers={f"Content-Disposition": "attachment;filename=" + output_file.filename},
     )
