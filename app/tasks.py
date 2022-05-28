@@ -15,45 +15,47 @@ class EmailType(str, enum.Enum):
 
 @celery.task(name="process_file")
 def process_job(job_id):
-    print("received task, creating job")
-    internal_process_job(job_id)
+    current_app.logger.info("Processing File...")
+    try:
+        internal_process_job(job_id)
+    except Exception as e:
+        current_app.logger.error(e, exc_info=True)
+        return EmailType.failed
     return EmailType.succeeded
 
 
-@celery.task(name="send_email")
-def send_email(email_type: EmailType, email: str, status_page_link: str):
-
+@celery.task(name="send_email", bind=True, max_retries=3)
+def send_email(self, email_type: EmailType, email: str, status_page_link: str):
+    current_app.logger.info("Sending Email...")
     # TODO: https://github.com/sendgrid/sendgrid-python/blob/main/use_cases/transactional_templates.md
     # Use transactional templates for dynamcisim
-    sg = sendgrid.SendGridAPIClient(api_key=current_app.config["SENDGRID_API_KEY"])
+
     from_email = Email(current_app.config["SENDGRID_FROM_EMAIL"])
     to_email = To(email)
 
     if email_type == EmailType.received:
         subject = "Your File is Being Processed"
+        html_content = ("<strong>Your file is being processed.</strong>",)
     elif email_type == EmailType.succeeded:
         subject = "Your File is Ready"
-        # content = Content(
-        #     "text/plain", "here is the link where you can download your lead list!"
-        # )
+        html_content = ("<strong>Your file is ready.</strong>",)
     else:
-        pass
+        subject = "Something Went Wrong, We're Investigating"
+        html_content = (
+            "<strong>We could not process your file. I'm looking into it and I'll send the processed version directly to you so you don't have to resubmit.</strong>",
+        )
 
-    mail = Mail(
-        from_email,
-        to_email,
-        subject,
-        html_content="<strong>Your file is being processed. Or maybe it's done.</strong>",
-    )
+    mail = Mail(from_email, to_email, subject, html_content)
     mail.dynamic_template_data = {
         "status_page_link": f"{status_page_link}",
     }
     mail.template_id = current_app.config["SENDGRID_TEMPLATE_ID"]
 
     try:
-        response = sg.client.mail.send.post(request_body=mail.get())
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        print(e.message)
+        sg = sendgrid.SendGridAPIClient(api_key=current_app.config["SENDGRID_API_KEY"])
+        sg.client.mail.send.post(request_body=mail.get())
+    except Exception as exc:
+        current_app.logger.error(exc, exc_info=True)
+        self.retry(countdown=10, exc=exc)
+        # What to do here TBD, send an email to self?
+        # or raise HTTP error back to flask server?
