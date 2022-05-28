@@ -3,7 +3,6 @@ from flask import (
     request,
     current_app,
     Blueprint,
-    abort,
     redirect,
     url_for,
     Response,
@@ -14,6 +13,7 @@ from http import HTTPStatus
 from app import db
 from celery import chain
 from depot.manager import DepotManager
+from sqlalchemy import exc
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
@@ -21,12 +21,12 @@ main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 @main_blueprint.route("/")
 def get_home():
-    current_app.logger.info("home page loading")
     return render_template("index.html")
 
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
+    current_app.logger.info("Handling Upload")
 
     ### Parse and Validate
     term_list = [x.strip() for x in request.form["term_list"].split(",")]
@@ -43,33 +43,44 @@ def process_upload():
     file = request.files.get("file_upload")
 
     if not file:
-        print(f"no file,{file}")
-        abort(HTTPStatus.BAD_REQUEST, "no file provided")
+        current_app.logger.warning("No file provided")
+        return render_template("400.html"), HTTPStatus.BAD_REQUEST
 
     mime_types = set(file.content_type.split(","))
     is_mime_type_allowed = any(mime_types.intersection(ACCEPTED_MIME_TYPES))
 
     if not is_mime_type_allowed:
-        abort(HTTPStatus.BAD_REQUEST, f"allowed mimetypes are {ACCEPTED_MIME_TYPES}")
+        current_app.logger.warning(
+            f"Mimetype Error: expecting csv but got {mime_types}"
+        )
+        return render_template("400.html"), HTTPStatus.BAD_REQUEST
 
     ### Write Job to DB
     user = get_or_create(User, email=email)
     current_app.logger.info(f"Received Upload from User: {user.id}")
 
-    job = Job(
-        user_id=user.id,
-        input_file=file,
-        term_list=term_list,
-        page_list=page_list,
-        case_sensitive=case_sensitive,
-        exact_page=exact_page,
-    )
-    db.session.add(job)
-    db.session.commit()
+    try:
+        current_app.logger.info(f"Writing Job to DB")
+        job = Job(
+            user_id=user.id,
+            input_file=file,
+            term_list=term_list,
+            page_list=page_list,
+            case_sensitive=case_sensitive,
+            exact_page=exact_page,
+        )
+        db.session.add(job)
+        db.session.commit()
+    except exc.SQLAlchemyError as e:
+        current_app.logger.error(f"{type(e)} occurred", exc_info=True)
+        db.session.rollback()
+        return render_template("500.html"), HTTPStatus.INTERNAL_SERVER_ERROR
 
     ### Email User Status Page
     status_page_link = url_for("main.get_home") + f"/jobs/{job.id}"
-    send_email(EmailType.received, user.email, status_page_link)
+    current_app.logger.debug(status_page_link)
+
+    send_email.delay(EmailType.received, user.email, status_page_link)
 
     ### Process File
     task_chain = chain(
@@ -92,8 +103,8 @@ def get_job(job_id):
         job = Job.query.get(job_id)
         status = process_job.AsyncResult(job.celery_id).status
     except Exception as error:
-        current_app.logger.info(error)
-        abort(HTTPStatus.BAD_REQUEST, "job doesn't exist")
+        current_app.logger.info(f"Job ID: {job_id} does not exist")
+        return render_template("404.html"), HTTPStatus.NOT_FOUND
 
     # Build response object
     job_information = JobSchema().dump(job)
