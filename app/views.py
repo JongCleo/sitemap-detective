@@ -108,11 +108,14 @@ def get_job(job_id):
 
     # Build response object
     job_information = JobSchema().dump(job)
+    print(job_information)
 
     job_information.update(
         {
             "status": status,
-            "output_file_name": job.output_file.filename,  # flattening bc Jinja can't parse nested props
+            "output_file_name": "N/A"
+            if job.output_file is None
+            else job.output_file.filename,  # flattening bc Jinja can't parse nested props
             "input_file_name": job.input_file.filename,
         }
     )
