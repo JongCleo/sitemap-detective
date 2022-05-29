@@ -12,6 +12,7 @@ from .helper_functions import is_valid_url
 from .models import Job
 from depot.manager import DepotManager
 from app import db
+from flask import current_app
 
 
 class HiddenPrints:
@@ -32,6 +33,7 @@ def process_job(job_id: str):
     """Checks a list of domains for the existence of certain pages and keywords in each domains' sitemaps"""
 
     ### Load data into memory from DB
+    current_app.logger.info("Loading job data into memory")
     db_job = Job.query.get(job_id)
     input_file = DepotManager.get_file(db_job.input_file.path)
     input_urls = get_urls(input_file)
@@ -43,11 +45,12 @@ def process_job(job_id: str):
 
     # Stuff for Concurrency
     job_queue = mp.Manager().Queue()
-
     sub_jobs = []
 
     # Put listener to work first
+
     with mp.Pool() as process_pool:
+        current_app.logger.info("Starting Listener Processes...")
         process_pool.apply_async(
             listener,
             (
@@ -55,6 +58,7 @@ def process_job(job_id: str):
                 output_file_path,
             ),
         )
+        current_app.logger.info("Starting Worker Processes...")
         for input_url in input_urls:
             sub_job = process_pool.apply_async(
                 process_url,
@@ -76,17 +80,14 @@ def process_job(job_id: str):
         job_queue.put("kill")
         process_pool.close()
         process_pool.join()
+        current_app.logger.info("Writing to Output File...")
         finish_job(db_job, output_file_path)
 
 
 def get_urls(input_file) -> list:
     """Parses the file-to-be-processed into a list of urls
-
     Args:
         input_file: StoredFile object from depot pckg
-
-    Returns:
-        _type_: list of stringified urls_
     """
 
     input_urls = []
@@ -188,14 +189,14 @@ def find_terms_on_homepage(site: str, term_list: list, case_sensitive: bool) -> 
         list: list of boolean terms indicating presence of each keyword,
         corresponding to the header in __make_output_file()
     """
-    print("looking for terms in home page...")
+    current_app.logger.info("Searching homepage for keywords...")
     term_exist_list = []
 
     with HTMLSession() as session:
         try:
             r = session.get(site, headers={"User-Agent": "Mozilla/5.0"})
         except requests.exceptions.RequestException as e:
-            print(e)
+            current_app.logger.warning(f"Failed to fetch homepage error {e}")
             for term in term_list:
                 term_exist_list.append("N/A")
             return term_exist_list
@@ -206,8 +207,8 @@ def find_terms_on_homepage(site: str, term_list: list, case_sensitive: bool) -> 
                     term_exist_list.append("True")
                 else:
                     term_exist_list.append("False")
-        except:
-            print("Render attempt likely timed out")
+        except Exception as e:
+            current_app.logger.warning(f"Render likely timed out. {e}")
             for term in term_list:
                 term_exist_list.append("N/A")
 
@@ -228,14 +229,17 @@ def find_pages_in_sitemap(site: str, page_list: list, exact_page: bool) -> dict:
     with HiddenPrints():
         try:
             tree = sitemap_tree_for_homepage(site)
-        except:
-            print("Failed to retrieve sitemap")
+        except Exception as e:
+            current_app.logger.error(f"Failed to fetch sitemap {e}")
+            return page_exist_dict
 
-    print("searching sitemap")
+    current_app.logger.info("Searching sitemap...")
     for page in tree.all_pages():
         potential_match = urlparse(page.url).path
 
-        if len(potential_match) <= 1:
+        if (
+            len(potential_match) <= 1
+        ):  # Catch dumb edge case for invisible strings which throw outOfBounds errors in the logic below
             continue
 
         potential_match = (
