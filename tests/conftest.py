@@ -3,6 +3,7 @@ import pytest
 from app import create_app, db as database
 from app.models import Job, User
 from tests import helpers
+from flask import template_rendered
 
 
 @pytest.fixture(scope="session")
@@ -60,3 +61,17 @@ def job(user, db):
     db.session.add(job)
     db.session.commit()
     return job
+
+
+@pytest.fixture
+def captured_templates(app):
+    recorded = []
+
+    def record(sender, template, context, **extra):
+        recorded.append((template, context))
+
+    template_rendered.connect(record, app)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, app)

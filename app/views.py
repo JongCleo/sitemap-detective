@@ -21,7 +21,7 @@ main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 @main_blueprint.route("/")
 def get_home():
-    return render_template("index.html")
+    return render_template("index.html"), HTTPStatus.OK
 
 
 @main_blueprint.route("/upload", methods=["POST"])
@@ -92,7 +92,7 @@ def process_upload():
     db.session.commit()
 
     # 303 == POST acknowledgement, Src: https://stackoverflow.com/questions/4584728/redirecting-with-a-201-created
-    return redirect(url_for("main.get_home", job_id=job.id)), HTTPStatus.SEE_OTHER
+    return redirect(url_for("main.get_job", job_id=job.id)), HTTPStatus.SEE_OTHER
 
 
 @main_blueprint.route("/jobs/<job_id>", methods=["GET"])
