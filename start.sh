@@ -5,9 +5,11 @@
 celery -A celery_worker.celery purge -f
 python ./utilities.py create_db
 brew services start redis
+mkdir -p logs
+touch logs/celery.log
 
 # start app, worker and worker dashboard
-watchmedo auto-restart -d 'app/' -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info --logfile=/logs/celery.log &
+watchmedo auto-restart -d 'app/' -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log &
 watchmedo auto-restart -d 'app/' -p '*.py' -- celery --app celery_worker.celery flower --port=5555 &
 flask run
 
