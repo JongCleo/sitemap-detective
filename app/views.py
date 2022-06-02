@@ -14,60 +14,83 @@ from app import db
 from celery import chain
 from depot.manager import DepotManager
 from sqlalchemy import exc
+from wtforms import (
+    Form,
+    BooleanField,
+    StringField,
+    EmailField,
+    FileField,
+    validators,
+    ValidationError,
+    SubmitField,
+    FieldList,
+)
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 
+def validate_file(form, field):
+    print(field)
+    print(type(field.data))
+    file = field.data
+    mime_types = set(file.content_type.split(","))
+    is_mime_type_allowed = any(mime_types.intersection(ACCEPTED_MIME_TYPES))
+
+    if not is_mime_type_allowed:
+        raise ValidationError(f"Mimetype Error: expecting csv but got {mime_types}")
+
+
+class UploadForm(Form):
+    name = StringField("Name", validators=[validators.data_required()])
+    email = EmailField("Email Address", validators=[validators.data_required()])
+    term_list = StringField("Terms/Phrases to Search")
+    case_sensitive = BooleanField("Case Sensitivity")
+    page_list = StringField("Subpages to Search")
+    exact_page = BooleanField("Exact Phrasing")
+    file_upload = FileField("CSV Upload", [validators.data_required(), validate_file])
+    submit = SubmitField("Start Job")
+
+
 @main_blueprint.route("/")
 def get_home():
-    return render_template("index.html"), HTTPStatus.OK
+    form = UploadForm()
+    return render_template("index.html", form=form), HTTPStatus.OK
 
 
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
     current_app.logger.info("Handling Upload")
-
-    ### Parse and Validate
-    term_list = [x.strip() for x in request.form["term_list"].split(",")]
-    page_list = [x.strip() for x in request.form["page_list"].split(",")]
-    case_sensitive = (
-        request.form["case_sensitive"]
-        if request.form["case_sensitive"] == None
-        else False
+    form = UploadForm(
+        data={
+            "name": request.form.get("name"),
+            "email": request.form.get("email"),
+            "term_list": request.form.get("term_list"),
+            "case_sensitive": request.form.get("case_sensitive"),
+            "page_list": request.form.get("page_list"),
+            "exact_page": request.form.get("exact_page"),
+            "file_upload": request.files.get("file_upload"),
+        }
     )
-    exact_page = (
-        request.form["exact_page"] if request.form["exact_page"] == None else False
-    )
-    email = request.form["email"]
-    file = request.files.get("file_upload")
-
-    if not file:
-        current_app.logger.warning("No file provided")
-        return render_template("400.html"), HTTPStatus.BAD_REQUEST
-
-    mime_types = set(file.content_type.split(","))
-    is_mime_type_allowed = any(mime_types.intersection(ACCEPTED_MIME_TYPES))
-
-    if not is_mime_type_allowed:
-        current_app.logger.warning(
-            f"Mimetype Error: expecting csv but got {mime_types}"
+    if not form.validate():
+        return (
+            render_template("index.html", form=form),
+            HTTPStatus.BAD_REQUEST,
         )
-        return render_template("400.html"), HTTPStatus.BAD_REQUEST
 
     ### Write Job to DB
-    user = get_or_create(User, email=email)
+    user = get_or_create(User, email=form.email.data)
     current_app.logger.info(f"Received Upload from User: {user.id}")
 
     try:
         current_app.logger.info(f"Writing Job to DB")
         job = Job(
             user_id=user.id,
-            input_file=file,
-            term_list=term_list,
-            page_list=page_list,
-            case_sensitive=case_sensitive,
-            exact_page=exact_page,
+            input_file=form.file_upload.data,
+            term_list=form.term_list.data,
+            page_list=form.page_list.data,
+            case_sensitive=form.case_sensitive.data,
+            exact_page=form.exact_page.data,
         )
         db.session.add(job)
         db.session.commit()
