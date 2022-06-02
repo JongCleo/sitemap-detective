@@ -20,7 +20,7 @@ celery = Celery(
     __name__,
     broker=Config.CELERY_BROKER_URL,
     backend=Config.RESULT_BACKEND,
-    task_ignore_result=True,
+    # task_ignore_result=True,
 )
 
 ### Instantiate db
