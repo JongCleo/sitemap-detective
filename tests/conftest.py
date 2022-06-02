@@ -63,6 +63,7 @@ def job(user, db):
     return job
 
 
+# source: https://stackoverflow.com/questions/57006104/how-to-test-flask-view-context-and-templates-using-pytest
 @pytest.fixture
 def captured_templates(app):
     recorded = []
