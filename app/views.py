@@ -19,14 +19,17 @@ from wtforms import (
     BooleanField,
     StringField,
     EmailField,
-    FileField,
     validators,
     ValidationError,
     SubmitField,
-    FieldList,
 )
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired, FileSize, FileAllowed
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
+MAX_FILE_SIZE = 260000
+# 1 column * 10k observations
+# * 11 utf-8 chars per average domain * 2 bytes per char + 4 * 10k buffer
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 
@@ -41,20 +44,28 @@ def validate_file(form, field):
         raise ValidationError(f"Mimetype Error: expecting csv but got {mime_types}")
 
 
-class UploadForm(Form):
+class UploadForm(FlaskForm):
     name = StringField("Name", validators=[validators.data_required()])
     email = EmailField("Email Address", validators=[validators.data_required()])
     term_list = StringField("Terms/Phrases to Search")
     case_sensitive = BooleanField("Case Sensitivity")
     page_list = StringField("Subpages to Search")
     exact_page = BooleanField("Exact Phrasing")
-    file_upload = FileField("CSV Upload", [validators.data_required(), validate_file])
+    file_upload = FileField(
+        "CSV Upload",
+        [
+            FileRequired(),
+            FileSize(MAX_FILE_SIZE, message="File cannot exceed 250kb"),
+            FileAllowed(["csv"], "CSVs only"),
+        ],
+    )
+
     submit = SubmitField("Start Job")
 
 
 @main_blueprint.route("/")
 def get_home():
-    form = UploadForm()
+    form = UploadForm(meta={"csrf": False})
     return render_template("index.html", form=form), HTTPStatus.OK
 
 
@@ -71,15 +82,16 @@ def process_upload():
             "page_list": request.form.get("page_list"),
             "exact_page": request.form.get("exact_page"),
             "file_upload": request.files.get("file_upload"),
-        }
+        },
+        meta={"csrf": False},
     )
 
-    if not form.validate():
+    if not form.validate_on_submit():
         return (
             render_template("index.html", form=form),
             HTTPStatus.BAD_REQUEST,
         )
-    print(form)
+
     ### Write Job to DB
     user = get_or_create(User, email=form.email.data)
     current_app.logger.info(f"Received Upload from User: {user.id}")
