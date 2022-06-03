@@ -1,72 +1,17 @@
 {% extends "base.html" %} {% block content %}
 <div class="flex justify-center items-center h-screen w-full bg-blue-400">
   <div class="w-1/2 bg-white rounded shadow-2xl p-8 m-4">
-    <h1 class="block w-full text-center text-gray-800 text-2xl font-bold mb-6">
-      Register
-    </h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <div class="flex flex-col mb-4">
-        <label class="mb-2 font-bold text-lg text-gray-900" for="first_name"
-          >Name</label
-        >
-        <input
-          class="border py-2 px-3 text-grey-800"
-          type="text"
-          name="name"
-          id="name"
-        />
-      </div>
-      <div class="flex flex-col mb-4">
-        <label class="mb-2 font-bold text-lg text-gray-900" for="email"
-          >Email</label
-        >
-        <input
-          class="border py-2 px-3 text-grey-800"
-          type="email"
-          name="email"
-          id="email"
-        />
-      </div>
-      <div class="flex flex-col mb-4">
-        <label class="mb-2 font-bold text-lg text-gray-900" for="term_list"
-          >Term List</label
-        >
-        <input
-          class="border py-2 px-3 text-grey-800"
-          type="text"
-          name="term_list"
-          id="term_list"
-        />
-      </div>
-      <div class="flex flex-col mb-4">
-        <label class="mb-2 font-bold text-lg text-gray-900" for="page_list"
-          >Page List</label
-        >
-        <input
-          class="border py-2 px-3 text-grey-800"
-          type="text"
-          name="page_list"
-          id="page_list"
-        />
-      </div>
-      <div class="flex flex-col mb-4">
-        <label class="mb-2 font-bold text-lg text-gray-900" for="email"
-          >CSV Upload</label
-        >
-        <input
-          class="border py-2 px-3 text-grey-800"
-          type="file"
-          name="fileupload"
-          id="fileupload"
-        />
-      </div>
+    {% from "_formhelpers.html" import render_field %}
+    <form action={{ url_for('main.process_upload') }} method="post" enctype="multipart/form-data">
+      {{ render_field(form.name, class="border py-2 px-3 text-grey-800")}} {{
+      render_field(form.email)}} {{ render_field(form.term_list)}} {{
+      render_field(form.case_sensitive)}} {{ render_field(form.page_list)}} {{
+      render_field(form.exact_page)}} {{ render_field(form.file_upload)}}
 
-      <button
-        class="block bg-blue-400 hover:bg-blue-600 text-white uppercase text-lg mx-auto p-4 rounded"
-        type="submit"
-      >
-        Create Account
-      </button>
+      <div class="flex flex-col mb-4">
+        {{form.submit(class="block bg-blue-400 hover:bg-blue-600 text-white
+        uppercase text-lg mx-auto p-4 rounded")|safe}}
+      </div>
     </form>
     <a
       class="block w-full text-center no-underline mt-4 text-sm text-gray-700 hover:text-gray-900"
