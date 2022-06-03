@@ -35,15 +35,13 @@ def send_email(self, email_type: EmailType, email: str, status_page_link: str):
 
     if email_type == EmailType.received:
         subject = "Your File is Being Processed"
-        html_content = ("<strong>Your file is being processed.</strong>",)
+        html_content = "<strong>Your file is being processed.</strong>"
     elif email_type == EmailType.succeeded:
         subject = "Your File is Ready"
-        html_content = ("<strong>Your file is ready.</strong>",)
+        html_content = "<strong>Your file is ready.</strong>"
     else:
         subject = "Something Went Wrong, We're Investigating"
-        html_content = (
-            "<strong>We could not process your file. I'm looking into it and I'll send the processed version directly to you so you don't have to resubmit.</strong>",
-        )
+        html_content = "<strong>We could not process your file. I'm looking into it and I'll send the processed version directly to you so you don't have to resubmit.</strong>"
 
     mail = Mail(from_email, to_email, subject, html_content)
     mail.dynamic_template_data = {

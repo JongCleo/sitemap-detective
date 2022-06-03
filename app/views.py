@@ -61,6 +61,7 @@ def get_home():
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
     current_app.logger.info("Handling Upload")
+    print(request.form.get("term_list"))
     form = UploadForm(
         data={
             "name": request.form.get("name"),
@@ -72,12 +73,13 @@ def process_upload():
             "file_upload": request.files.get("file_upload"),
         }
     )
+
     if not form.validate():
         return (
             render_template("index.html", form=form),
             HTTPStatus.BAD_REQUEST,
         )
-
+    print(form)
     ### Write Job to DB
     user = get_or_create(User, email=form.email.data)
     current_app.logger.info(f"Received Upload from User: {user.id}")
@@ -87,8 +89,8 @@ def process_upload():
         job = Job(
             user_id=user.id,
             input_file=form.file_upload.data,
-            term_list=form.term_list.data,
-            page_list=form.page_list.data,
+            term_list=[x.strip() for x in form.term_list.data.split(",")],
+            page_list=[x.strip() for x in form.page_list.data.split(",")],
             case_sensitive=form.case_sensitive.data,
             exact_page=form.exact_page.data,
         )
@@ -100,7 +102,7 @@ def process_upload():
         return render_template("500.html"), HTTPStatus.INTERNAL_SERVER_ERROR
 
     ### Email User Status Page
-    status_page_link = url_for("main.get_home") + f"/jobs/{job.id}"
+    status_page_link = request.url_root + f"jobs/{job.id}"
     current_app.logger.debug(status_page_link)
 
     send_email.delay(EmailType.received, user.email, status_page_link)
