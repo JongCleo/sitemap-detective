@@ -1,5 +1,52 @@
 {% extends "base.html" %} {% block content %}
-<div class="flex justify-center items-center h-screen w-full bg-blue-400">
+
+<!-- Hero Header -->
+<div class="relative bg-white overflow-hidden">
+  <div class="max-w-7xl mx-auto">
+    <!-- Logo Top Left -->
+    <div class="relative pt-6 px-4 sm:px-6 lg:px-8">
+      <div class="relative flex items-center justify-between sm:h-10 lg:justify-start" >
+        <div class="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
+          <div class="flex items-center justify-between w-full md:w-auto">
+            <a href="/">
+              <span>Sitemap Detective</span>              
+            </a>            
+          </div>
+        </div>
+      </div> 
+    </div>
+
+    <!-- Left Side Hero -->
+    <div
+      class="relative pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32"
+    >
+      <main
+        class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28"
+      >
+        <div class="sm:text-center lg:text-left">
+          <h1
+            class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl"
+          >
+            <span class="block text-indigo-600 xl:inline"
+              >Qualify website leads</span
+            >
+            <span class="block xl:inline">based on subpages and content</span>
+          </h1>
+        </div>
+      </main>
+    </div>
+
+    <!-- Video Demo -->
+    <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+      <div class="flex justify-center">
+        <iframe src="https://www.loom.com/embed/87a580c1f87349a9befb6175a605883e" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; width: 90%; height: 90%;"></iframe>          
+      </div>            
+    </div>
+  </div>  
+</div>
+
+<div class="flex justify-center items-center h-screen w-full">
+    
   <div class="w-1/2 bg-white rounded shadow-2xl p-8 m-4">
     {% from "_formhelpers.html" import render_field %}
     <form action={{ url_for('main.process_upload') }} method="post" enctype="multipart/form-data">
