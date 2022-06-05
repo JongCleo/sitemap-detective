@@ -27,9 +27,9 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileSize, FileAllowed
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
-MAX_FILE_SIZE = 260000
+MAX_FILE_SIZE = 512000
 # 1 column * 10k observations
-# * 11 utf-8 chars per average domain * 2 bytes per char + 4 * 10k buffer
+# * 11 utf-8 chars per average domain * 2 bytes per char + 4 * 10k buffer * 2 just bc 250 kb sounded small
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 
