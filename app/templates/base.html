@@ -15,10 +15,14 @@
     <title>Sitemap Detective</title>
   </head>
 
-  <body>
-    <main>
-      <!-- child template -->
-      {% block content %} {% endblock %}
-    </main>
+  <body class="bg-slate-300">
+    <!-- Logo Top Left -->
+    <div class="absolute top-0 left-0 p-8">
+      <a href="/">
+        <span>Sitemap Detective</span>
+      </a>
+    </div>
+    <!-- child template -->
+    {% block content %} {% endblock %}
   </body>
 </html>
