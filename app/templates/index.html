@@ -26,16 +26,15 @@
 </div>
 
 
-<!-- Rough Fake Form-->
-<div class="max-w-2xl mx-auto rounded-lg shadow-lg flex justify-center content-start">
+<!-- Form-->
+<div class="max-w-4xl mx-auto rounded-lg shadow-lg flex justify-center content-start">
   <form action="#" method="POST">
       <!-- Form container-->
-      <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+      <div class="px-4 py-5 bg-white space-y-10 sm:p-6">
+
         <!-- File Upload -->
         <div>
           <label class="block text-sm font-medium text-gray-700"> CSV Upload </label>
-  
-
           <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
             <div class="space-y-1 text-center">
               <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
@@ -51,8 +50,60 @@
               <p id="file-name" class="text-xs text-gray-500"></p>
             </div>
           </div>
+        </div>        
+
+        <!-- Sitemap Search -->
+        <div class="flex flex-wrap space-x-3 mb-5"> 
+          
+          <div class="mt-1 space-y-6 sm:mb-4 md:flex-1 md:mr-4">             
+            <div class="flex flex-col space-y-2">
+              <label class="block text-sm font-medium text-gray-700"> Sitemap Search Terms</label>
+              <input type="text" class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300" placeholder="careers, jobs, talent">
+              <p class="text-xs text-gray-500">Enter a comma separated list of keywords to match with subpages.</p>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="flex items-center h-5">
+                <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+              </div>
+              <div class="ml-3">
+                <label for="comments" class="text-sm font-medium text-gray-700">Exact Page Only</label>
+                <p class="text-xs text-gray-500">If turned on "jobs" would not match "jobs-and-careers".</p>
+              </div>
+            </div>
+            
+          </div>
+          <div class="md:flex-1">
+            <img class="" src="{{url_for('static', filename='sitemapsearch.gif')}}" alt="">
+          </div>
         </div>
-        
+
+        <!-- On-Page Search -->
+        <div class="flex flex-wrap space-x-3"> 
+          <div class="mt-1 space-y-6 sm:mb-4 md:flex-1 md:mr-4"> 
+            <!-- Terms -->
+            <div class="flex flex-col space-y-2">
+              <label class="block text-sm font-medium text-gray-700"> On-Page Search Terms </label>
+              <input type="text" class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300" placeholder="customer, GDPR">
+              <p class="text-xs text-gray-500">Enter a comma separated list of search terms. We basically ctrl-f each term. Currently searches the homepage only.</p>
+            </div>
+            <!-- Case Sensitivity -->
+            <div class="flex items-start">
+              <div class="flex items-center h-5">
+                <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+              </div>
+              <div class="ml-3">
+                <label for="comments" class="text-sm font-medium text-gray-700">Case Sensitive</label>
+                <p class="text-xs text-gray-500">If turned on "GDPR" would not match "gdpr". Only other instances of "GDPR". </p>
+              </div>
+            </div>
+            
+          </div>
+          <div class="md:flex-1">
+            <img class="" src="{{url_for('static',filename='homepagesearch.gif')}}" alt="">
+          </div>
+
+        </div>
         <div class="grid grid-cols-3 gap-6">
           <div class="col-span-3 sm:col-span-2">
             <label for="company-website" class="block text-sm font-medium text-gray-700"> Website </label>
