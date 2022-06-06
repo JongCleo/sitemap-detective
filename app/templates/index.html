@@ -1,28 +1,26 @@
 {% extends "base.html" %} {% block content %}
-<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
-<script src="https://unpkg.com/create-file-list"></script>
 <script defer src="{{url_for('static', filename='helpers.js')}}"></script>
 
 <!-- Hero Header -->
-<div class="max-w-7xl mx-auto py-8">
+<div class="max-w-7xl mx-auto py-8 md:py-14">
   <!-- Left Side Text -->
-  <div class="relative pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-3/5 lg:pb-28 xl:pb-32">    
+  <div class="relative pb-8 sm:pb-5 md:pb-8 lg:w-3/5 lg:pb-28 xl:pb-32">    
     <div class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-      <div class="text-left sm:text-center">
-        <h1 class="text-3xl tracking-tight font-extrabold sm:text-4xl md:text-5xl">
+      <div class="lg:text-left text-center">
+        <h1 class="text-2xl tracking-tight font-extrabold sm:text-5xl md:text-6xl lg:text-6xl">
           <span class="block xl:inline text-indigo-600"
           >Filter website leads</span>
-          <span class="block xl:inline font-normal text-gray-900"> on <span class="font-extrabold italic">/subpages</span> and </span>
-          <span class="block xl:inline font-normal text-gray-900"> <span class="font-extrabold">&lt; p &gt; content &lt; / p &gt;</span></span>
+          <span class="block xl:inline font-normal text-gray-700"> on <span class="font-extrabold italic">/subpages</span> and </span>
+          <span class="block xl:inline font-normal text-gray-700"> <span class="font-extrabold">&lt; p &gt; content &lt; / p &gt;</span></span>
         </h1>
       </div>
     </div>
   </div>
 </div>
 <!-- Video Demo -->
-<div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-2/5">
-  <!-- <iframe class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full" src="https://www.loom.com/embed/87a580c1f87349a9befb6175a605883e" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>           -->
-  <img class="h-1/2 w-full object-cover sm:h-32 md:h-96 lg:w-full" src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80" alt="">
+<div class="sm:w-3/5 sm:mx-auto sm:mb-14 lg:absolute lg:pr-10 lg:pt-10 lg:inset-y-0 lg:right-0 lg:w-2/5">
+  <iframe class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full" src="https://www.loom.com/embed/87a580c1f87349a9befb6175a605883e" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>          
+  <!-- <img class="h-1/2 w-full object-cover sm:h-32 md:h-96 lg:w-full" src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80" alt=""> -->
 </div>
 
 
