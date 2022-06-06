@@ -6,7 +6,7 @@
 <!-- Hero Header -->
 <div class="max-w-7xl mx-auto py-8">
   <!-- Left Side Text -->
-  <div class="relative pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-3/5 lg:pb-28 xl:pb-32">    
+  <div class="relative pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-3/5 lg:pb-28 xl:pb-32">    
     <div class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
       <div class="text-left sm:text-center">
         <h1 class="text-3xl tracking-tight font-extrabold sm:text-4xl md:text-5xl">
@@ -27,10 +27,10 @@
 
 
 <!-- Form-->
-<div class="max-w-4xl mx-auto rounded-lg shadow-lg flex justify-center content-start">
-  <form action="#" method="POST">
+<div class="max-w-4xl mx-auto">
+<form action={{ url_for('main.process_upload') }} method="post" enctype="multipart/form-data">
       <!-- Form container-->
-      <div class="px-4 py-5 bg-white space-y-10 sm:p-6">
+      <div class="p-20 bg-white rounded-xl border-gray-100	shadow-lg space-y-10 sm:p-12">
 
         <!-- File Upload -->
         <div>
@@ -41,13 +41,13 @@
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               <div class="flex text-sm text-gray-600">
-                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                <label class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                   <span>Upload a CSV file</span>
-                  <input id="file-upload" name="file-upload" type="file" class="sr-only">
+                  {{form.file_upload(class="sr-only")}}                  
                 </label>
                 <p class="pl-1">or drag and drop</p>
               </div>
-              <p id="file-name" class="text-xs text-gray-500"></p>
+              <p id="file_name" class="text-xs text-gray-500"></p>
             </div>
           </div>
         </div>        
@@ -58,16 +58,16 @@
           <div class="mt-1 space-y-6 sm:mb-4 md:flex-1 md:mr-4">             
             <div class="flex flex-col space-y-2">
               <label class="block text-sm font-medium text-gray-700"> Sitemap Search Terms</label>
-              <input type="text" class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300" placeholder="careers, jobs, talent">
+              {{form.page_list(class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300", placeholder="careers, jobs, talent")}}              
               <p class="text-xs text-gray-500">Enter a comma separated list of keywords to match with subpages.</p>
             </div>
             
             <div class="flex items-start">
               <div class="flex items-center h-5">
-                <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                {{form.exact_page(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded")}}                                          
               </div>
               <div class="ml-3">
-                <label for="comments" class="text-sm font-medium text-gray-700">Exact Page Only</label>
+                <label class="text-sm font-medium text-gray-700">Exact Page Only</label>
                 <p class="text-xs text-gray-500">If turned on "jobs" would not match "jobs-and-careers".</p>
               </div>
             </div>
@@ -84,16 +84,16 @@
             <!-- Terms -->
             <div class="flex flex-col space-y-2">
               <label class="block text-sm font-medium text-gray-700"> On-Page Search Terms </label>
-              <input type="text" class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300" placeholder="customer, GDPR">
+              {{form.term_list(class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300", placeholder="customer, GDPR")}}              
               <p class="text-xs text-gray-500">Enter a comma separated list of search terms. We basically ctrl-f each term. Currently searches the homepage only.</p>
             </div>
             <!-- Case Sensitivity -->
             <div class="flex items-start">
               <div class="flex items-center h-5">
-                <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                {{form.case_sensitive(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded")}}                          
               </div>
               <div class="ml-3">
-                <label for="comments" class="text-sm font-medium text-gray-700">Case Sensitive</label>
+                <label class="text-sm font-medium text-gray-700">Case Sensitive</label>
                 <p class="text-xs text-gray-500">If turned on "GDPR" would not match "gdpr". Only other instances of "GDPR". </p>
               </div>
             </div>
@@ -102,103 +102,24 @@
           <div class="md:flex-1">
             <img class="" src="{{url_for('static',filename='homepagesearch.gif')}}" alt="">
           </div>
-
         </div>
-        <div class="grid grid-cols-3 gap-6">
-          <div class="col-span-3 sm:col-span-2">
-            <label for="company-website" class="block text-sm font-medium text-gray-700"> Website </label>
-            <div class="mt-1 flex rounded-md shadow-sm">
-              <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm"> http:// </span>
-              <input type="text" name="company-website" id="company-website" class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300" placeholder="www.example.com">
-            </div>
-          </div>
+        
+        <div class="flex flex-col space-y-2 w-2/5">
+          <label class="block text-sm font-medium text-gray-700"> Email </label>
+          {{form.email(class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300",placeholder="bobs@burgers.com")}}          
+          <p class="text-xs text-gray-500">Needed to send finished file. We promise no spam!</p>
         </div>
 
-        <div>
-          <label for="about" class="block text-sm font-medium text-gray-700"> About </label>
-          <div class="mt-1">
-            <textarea id="about" name="about" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="you@example.com"></textarea>
-          </div>
-          <p class="mt-2 text-sm text-gray-500">Brief description for your profile. URLs are hyperlinked.</p>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700"> Photo </label>
-          <div class="mt-1 flex items-center">
-            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
-              <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </span>
-            <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Change</button>
-          </div>
-        </div>
-
-        <fieldset>
-          <legend class="sr-only">By Email</legend>
-          <div class="text-base font-medium text-gray-900" aria-hidden="true">By Email</div>
-          <div class="mt-4 space-y-4">
-            <div class="flex items-start">
-              <div class="flex items-center h-5">
-                <input id="comments" name="comments" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-              </div>
-              <div class="ml-3 text-sm">
-                <label for="comments" class="font-medium text-gray-700">Comments</label>
-                <p class="text-gray-500">Get notified when someones posts a comment on a posting.</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="flex items-center h-5">
-                <input id="candidates" name="candidates" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-              </div>
-              <div class="ml-3 text-sm">
-                <label for="candidates" class="font-medium text-gray-700">Candidates</label>
-                <p class="text-gray-500">Get notified when a candidate applies for a job.</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="flex items-center h-5">
-                <input id="offers" name="offers" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-              </div>
-              <div class="ml-3 text-sm">
-                <label for="offers" class="font-medium text-gray-700">Offers</label>
-                <p class="text-gray-500">Get notified when a candidate accepts or rejects an offer.</p>
-              </div>
-            </div>
-          </div>
-        </fieldset>
+      <div class="sm:px-6">
+        {{form.submit(class="block bg-blue-400 hover:bg-blue-600 text-white
+        uppercase text-lg mx-auto py-2 px-4 rounded border border-transparent 
+        shadow-sm text-sm font-medium rounded-md focus:outline-none 
+        focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500")|safe}}            
       </div>
-      <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
       </div>
     
     </form>
   
-</div>
-
-
-<!-- The Form -->
-<div class="relative bg-slate-300	flex justify-center content-start h-screen w-full">
-    
-  <div class="w-3/4 bg-white rounded shadow-xl p-8 m-4">
-    {% from "_formhelpers.html" import render_field %}
-    <form action={{ url_for('main.process_upload') }} method="post" enctype="multipart/form-data">
-      {{ render_field(form.name, class="border py-2 px-3 text-grey-800")}} {{
-      render_field(form.email)}} {{ render_field(form.term_list)}} {{
-      render_field(form.case_sensitive)}} {{ render_field(form.page_list)}} {{
-      render_field(form.exact_page)}} {{ render_field(form.file_upload)}}
-
-      <div class="flex flex-col mb-4">
-        {{form.submit(class="block bg-blue-400 hover:bg-blue-600 text-white
-        uppercase text-lg mx-auto p-4 rounded")|safe}}
-      </div>
-    </form>
-    <a
-      class="block w-full text-center no-underline mt-4 text-sm text-gray-700 hover:text-gray-900"
-      href="/login"
-      >Already have an account?</a
-    >
-  </div>
 </div>
 
 {% endblock %}

@@ -45,7 +45,7 @@ def validate_file(form, field):
 
 
 class UploadForm(FlaskForm):
-    name = StringField("Name", validators=[validators.data_required()])
+    name = StringField("Name")
     email = EmailField("Email Address", validators=[validators.data_required()])
     term_list = StringField("Terms/Phrases to Search")
     case_sensitive = BooleanField("Case Sensitivity")
