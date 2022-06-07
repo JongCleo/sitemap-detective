@@ -1,13 +1,7 @@
-{% macro render_field(field) %}
-<div class="flex flex-col mb-4">
-  <label class="mb-2 font-bold text-lg text-gray-900"> {{field.label}} </label>
-  {{field(**kwargs)|safe}} {% if field.errors %}
-  <ul>
-    {% for error in field.errors %}
-    <li>{{error}}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-</div>
-
-{% endmacro %}
+{% macro render_field(field) %} {{field(**kwargs)|safe}} {% if field.errors %}
+<ul>
+  {% for error in field.errors %}
+  <li>{{error}}</li>
+  {% endfor %}
+</ul>
+{% endif %} {% endmacro %}

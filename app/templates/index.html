@@ -25,7 +25,8 @@
 
 
 <!-- Form-->
-<div class="max-w-4xl mx-auto">
+{% from "_formhelpers.html" import render_field %}
+<div class="max-w-4xl mx-auto mb-12">
 <form action={{ url_for('main.process_upload') }} method="post" enctype="multipart/form-data">
       <!-- Form container-->
       <div class="p-20 bg-white rounded-xl border-gray-100	shadow-lg space-y-10 sm:p-12">
@@ -41,7 +42,9 @@
               <div class="flex text-sm text-gray-600">
                 <label class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                   <span>Upload a CSV file</span>
-                  {{form.file_upload(class="sr-only")}}                  
+                  <div>
+                  {{ render_field(form.file_upload, class="sr-only")}}                   
+                  </div>
                 </label>
                 <p class="pl-1">or drag and drop</p>
               </div>
@@ -56,13 +59,14 @@
           <div class="mt-1 space-y-6 sm:mb-4 md:flex-1 md:mr-4">             
             <div class="flex flex-col space-y-2">
               <label class="block text-sm font-medium text-gray-700"> Sitemap Search Terms</label>
-              {{form.page_list(class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300", placeholder="careers, jobs, talent")}}              
+              {{ render_field(form.page_list, class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300", placeholder="careers, jobs, talent")}}
+              
               <p class="text-xs text-gray-500">Enter a comma separated list of keywords to match with subpages.</p>
             </div>
             
             <div class="flex items-start">
               <div class="flex items-center h-5">
-                {{form.exact_page(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded")}}                                          
+                {{render_field(form.exact_page,class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded")}}                
               </div>
               <div class="ml-3">
                 <label class="text-sm font-medium text-gray-700">Exact Page Only</label>
@@ -82,13 +86,13 @@
             <!-- Terms -->
             <div class="flex flex-col space-y-2">
               <label class="block text-sm font-medium text-gray-700"> On-Page Search Terms </label>
-              {{form.term_list(class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300", placeholder="customer, GDPR")}}              
+              {{render_field(form.term_list,class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300", placeholder="customer, GDPR" )}}              
               <p class="text-xs text-gray-500">Enter a comma separated list of search terms. We basically ctrl-f each term. Currently searches the homepage only.</p>
             </div>
             <!-- Case Sensitivity -->
             <div class="flex items-start">
               <div class="flex items-center h-5">
-                {{form.case_sensitive(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded")}}                          
+                {{render_field(form.case_sensitive,class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" )}}                
               </div>
               <div class="ml-3">
                 <label class="text-sm font-medium text-gray-700">Case Sensitive</label>
@@ -104,7 +108,7 @@
         
         <div class="flex flex-col space-y-2 w-2/5">
           <label class="block text-sm font-medium text-gray-700"> Email </label>
-          {{form.email(class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300",placeholder="bobs@burgers.com")}}          
+          {{render_field(form.email,class="focus:ring-indigo-500 p-1 rounded-md sm:text-sm border border-gray-300",placeholder="bobs@burgers.com")}}                          
           <p class="text-xs text-gray-500">Needed to send finished file. We promise no spam!</p>
         </div>
 
