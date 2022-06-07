@@ -1,20 +1,52 @@
 {% extends "base.html" %} {% block content %}
 
-<div class="mx-auto w-3/4 bg-white rounded shadow-xl p-8 m-4">
-  <div>
-    Job Status: {{job_information.status}} Job Id: {{job_information.id}} File
-    Name: {{job_information.input_file_name}} {% if job_information.output_file
-    is not none %} Output File: {{job_information.output_file_name}}
-    <a
-      href="{{ url_for('main.download_output_file', job_id=job_information.id) }}"
-      >Download Link</a
-    >
-    {% endif %}
+<div
+  class="mx-auto w-3/4 mt-20 bg-white rounded shadow-xl border-gray-100 p-8 m-4"
+>
+  <div class="p-10 space-y-10">
+    <!-- Header Information -->
+    <div class="text-gray-700">
+      <h1 class="font-bold text-3xl">Job # {{job_information.id}}</h1>
+      <span class="font-medium text-md"
+        >Submitted at {{job_information.created_at}}</span
+      >
+    </div>
 
-    <h1>Customizations</h1>
-    Pages:{{job_information.page_list}} Keywords: {{job_information.term_list}}
-    Case Sensitive: {{job_information.case_sensitive}} Exact Page:
-    {{job_information.exact_page}}
+    <!-- Cards -->
+    <div class="bg-slate-100 border-gray-100 space-y-4 p-4 text-gray-700">
+      <span class="text-2xl font-bold">Summary</span>
+      <div class="text-md font-medium flex flex-col space-y-2">
+        <span> Filename: {{job_information.input_file_name}}</span>
+        <span> Sitemap Search Terms:{{job_information.page_list}}</span>
+        <span>
+          Exact Page: {% if job_information.exact_page %} On {% else %} Off {%
+          endif %}
+        </span>
+        <span> On-Page Search Terms: {{job_information.term_list}}</span>
+        <span>
+          Case Sensitive: {% if job_information.case_sensitive %} On {% else %}
+          Off {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="bg-slate-100 border-gray-100 space-y-4 p-4 text-gray-700">
+      <span class="text-2xl font-bold">Results</span>
+      <div class="flex flex-col space-y-4">
+        {% if job_information.output_file is not none %} 
+          <span class="text-xl">Completed 🎉</span> 
+          <div>
+            <img></img>
+            <a class="hover:font-bold" href="{{ url_for('main.download_output_file', job_id=job_information.id) }}">
+              Download {{job_information.output_file_name}}
+            </a>            
+          </div>
+        {% else %}              
+        <span class="text-xl font-bold">In Progress</span> 
+        {% endif %}
+      </div>
+    </div>
+    
   </div>
 </div>
 
