@@ -13,24 +13,35 @@
     </div>
 
     <!-- Cards -->
-    <div class="bg-slate-100 border-gray-100 space-y-4 p-4 text-gray-700">
+    <div class="bg-slate-100 border-gray-100 space-y-4 p-6 text-gray-700">
       <span class="text-2xl font-bold">Summary</span>
       <div class="text-md font-medium flex flex-col space-y-2">
-        <span> Filename: {{job_information.input_file_name}}</span>
-        <span> Sitemap Search Terms:{{job_information.page_list}}</span>
-        <span>
-          Exact Page: {% if job_information.exact_page %} On {% else %} Off {%
-          endif %}
-        </span>
-        <span> On-Page Search Terms: {{job_information.term_list}}</span>
-        <span>
-          Case Sensitive: {% if job_information.case_sensitive %} On {% else %}
-          Off {% endif %}
-        </span>
+        <div class="flex flex-col space-y-1">
+          <span class="font-bold"> Filename </span>
+          <span> {{job_information.input_file_name}}</span>
+        </div>
+        <div class="flex flex-col space-y-1">
+          <span class="font-bold"> Sitemap Search Terms </span>
+          <span> {{job_information.page_list|join(', ')}}</span>
+        </div>
+        <div class="flex flex-col space-y-1">
+          <span class="font-bold"> Exact Page: </span>
+          <span> {% if job_information.exact_page %} On {% else %} Off {%
+            endif %}</span>
+        </div>
+        <div class="flex flex-col space-y-1">
+          <span class="font-bold"> On-Page Search Terms </span>
+          <span> {{job_information.term_list|join(', ')}}</span>
+        </div>
+        <div class="flex flex-col space-y-1">
+          <span class="font-bold"> Case Sensitive </span>
+          <span> {% if job_information.case_sensitive %} On {% else %}
+            Off {% endif %}</span>
+        </div>
       </div>
     </div>
 
-    <div class="bg-slate-100 border-gray-100 space-y-4 p-4 text-gray-700">
+    <div class="bg-slate-100 border-gray-100 space-y-4 p-6 text-gray-700">
       <span class="text-2xl font-bold">Results</span>
       <div class="flex flex-col space-y-4">
         {% if job_information.output_file is not none %} 
