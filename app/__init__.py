@@ -6,13 +6,14 @@ Based on https://github.com/angeuwase/production-flask-app-setup
 """
 
 import os
+import logging
+from logging.handlers import RotatingFileHandler
+
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from celery import Celery
 from config import Config
-import logging
 from flask.logging import default_handler
-from logging.handlers import RotatingFileHandler
 from depot.manager import DepotManager
 
 ### Instantiate Celery

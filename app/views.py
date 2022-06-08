@@ -19,7 +19,6 @@ from wtforms import (
     StringField,
     EmailField,
     validators,
-    ValidationError,
     SubmitField,
 )
 from flask_wtf import FlaskForm
@@ -60,7 +59,7 @@ def get_home():
 @main_blueprint.route("/upload", methods=["POST"])
 def process_upload():
     current_app.logger.info("Handling Upload")
-    print(request.form.get("term_list"))
+
     form = UploadForm(
         data={
             "name": request.form.get("name"),
@@ -83,7 +82,6 @@ def process_upload():
     ### Write Job to DB
     user = get_or_create(User, email=form.email.data)
     current_app.logger.info(f"Received Upload from User: {user.id}")
-
     try:
         current_app.logger.info(f"Writing Job to DB")
         job = Job(
