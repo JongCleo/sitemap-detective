@@ -8,7 +8,8 @@
     <div class="text-gray-700">
       <h1 class="font-bold text-3xl">Job # {{job_information.id}}</h1>
       <span class="font-medium text-md"
-        >Submitted at {{job_information.created_at}}</span
+        >Submitted on {{job_information.created_at.strftime("%B %d, %Y at %I:%M
+        %p")}}</span
       >
     </div>
 
@@ -26,8 +27,10 @@
         </div>
         <div class="flex flex-col space-y-1">
           <span class="font-bold"> Exact Page: </span>
-          <span> {% if job_information.exact_page %} On {% else %} Off {%
-            endif %}</span>
+          <span>
+            {% if job_information.exact_page %} On {% else %} Off {% endif
+            %}</span
+          >
         </div>
         <div class="flex flex-col space-y-1">
           <span class="font-bold"> On-Page Search Terms </span>
@@ -35,8 +38,10 @@
         </div>
         <div class="flex flex-col space-y-1">
           <span class="font-bold"> Case Sensitive </span>
-          <span> {% if job_information.case_sensitive %} On {% else %}
-            Off {% endif %}</span>
+          <span>
+            {% if job_information.case_sensitive %} On {% else %} Off {% endif
+            %}</span
+          >
         </div>
       </div>
     </div>
@@ -44,20 +49,25 @@
     <div class="bg-slate-100 border-gray-100 space-y-4 p-6 text-gray-700">
       <span class="text-2xl font-bold">Results</span>
       <div class="flex flex-col space-y-4">
-        {% if job_information.output_file is not none %} 
-          <span class="text-xl">Completed 🎉</span> 
-          <div>
-            <img></img>
-            <a class="hover:font-bold" href="{{ url_for('main.download_output_file', job_id=job_information.id) }}">
-              Download {{job_information.output_file_name}}
-            </a>            
-          </div>
-        {% else %}              
-        <span class="text-xl font-bold">In Progress</span> 
+        {% if job_information.output_file is not none %}
+        <span class="text-xl">Completed 🎉</span>
+        <div>
+          <img
+            class="h-7 w-7"
+            src="{{ url_for('static', filename='csv.png') }}"
+          />
+          <a
+            class="hover:font-semibold"
+            href="{{ url_for('main.download_output_file', job_id=job_information.id) }}"
+          >
+            Download {{job_information.output_file_name}}
+          </a>
+        </div>
+        {% else %}
+        <span class="text-xl font-bold">In Progress</span>
         {% endif %}
       </div>
     </div>
-    
   </div>
 </div>
 

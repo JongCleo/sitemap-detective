@@ -136,6 +136,7 @@ def get_job(job_id):
 
     job_information.update(
         {
+            "created_at": job.created_at,
             "status": status,
             "output_file_name": "N/A"
             if job.output_file is None
