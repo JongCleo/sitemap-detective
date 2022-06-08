@@ -15,7 +15,6 @@ from celery import chain
 from depot.manager import DepotManager
 from sqlalchemy import exc
 from wtforms import (
-    Form,
     BooleanField,
     StringField,
     EmailField,
@@ -31,17 +30,6 @@ MAX_FILE_SIZE = 512000
 # 1 column * 10k observations
 # * 11 utf-8 chars per average domain * 2 bytes per char + 4 * 10k buffer * 2 just bc 250 kb sounded small
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
-
-
-def validate_file(form, field):
-    print(field)
-    print(type(field.data))
-    file = field.data
-    mime_types = set(file.content_type.split(","))
-    is_mime_type_allowed = any(mime_types.intersection(ACCEPTED_MIME_TYPES))
-
-    if not is_mime_type_allowed:
-        raise ValidationError(f"Mimetype Error: expecting csv but got {mime_types}")
 
 
 class UploadForm(FlaskForm):
