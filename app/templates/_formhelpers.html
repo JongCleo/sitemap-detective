@@ -1,5 +1,5 @@
 {% macro render_field(field) %} {{field(**kwargs)|safe}} {% endmacro %} {% macro
-render_errors(field)%}
+render_errors(field)%} {% if field.errors %}
 <div
   class="g-orange-100 border-l-4 border-orange-500 text-orange-700 p-4"
   role="alert"
@@ -10,4 +10,4 @@ render_errors(field)%}
   {% endfor %}
 </div>
 
-{% endmacro %}
+{% endif %} {% endmacro %}
