@@ -1,7 +1,13 @@
-{% macro render_field(field) %} {{field(**kwargs)|safe}} {% if field.errors %}
-<ul>
+{% macro render_field(field) %} {{field(**kwargs)|safe}} {% endmacro %} {% macro
+render_errors(field)%}
+<div
+  class="g-orange-100 border-l-4 border-orange-500 text-orange-700 p-4"
+  role="alert"
+>
+  <p class="font-bold">Errors</p>
   {% for error in field.errors %}
-  <li>{{error}}</li>
+  <span>{{error}}</span>
   {% endfor %}
-</ul>
-{% endif %} {% endmacro %}
+</div>
+
+{% endmacro %}

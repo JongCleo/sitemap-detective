@@ -25,12 +25,12 @@
 
 
 <!-- Form-->
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field,render_errors  %}
 <div class="max-w-4xl mx-auto mb-12">
 <form action={{ url_for('main.process_upload') }} method="post" enctype="multipart/form-data">
       <!-- Form container-->
       <div class="p-20 bg-white rounded-xl border-gray-100 shadow-lg space-y-10 sm:p-12">
-
+          
         <!-- File Upload -->
         <div>
           <label class="block text-sm font-medium text-gray-700"> CSV Upload </label>
@@ -51,6 +51,7 @@
               <p id="file_name" class="text-xs text-gray-500"></p>
             </div>
           </div>
+          {{render_errors(form.file_upload)}}
         </div>        
 
         <!-- Sitemap Search -->
