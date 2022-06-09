@@ -1,3 +1,6 @@
+from .tasks import process_job, send_email, EmailType
+from .models import Job, User, JobSchema, get_or_create
+from .helper_functions import guess_encoding, guess_csv_dialect
 from flask import (
     render_template,
     request,
@@ -7,8 +10,6 @@ from flask import (
     url_for,
     Response,
 )
-from .tasks import process_job, send_email, EmailType
-from .models import Job, User, JobSchema, get_or_create
 from http import HTTPStatus
 from app import db
 from celery import chain
@@ -20,15 +21,31 @@ from wtforms import (
     EmailField,
     validators,
     SubmitField,
+    ValidationError,
 )
+from wtforms.validators import StopValidation
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileSize, FileAllowed
+import csv
+import io
 
 ACCEPTED_MIME_TYPES = {"text/csv", "application/csv"}
 MAX_FILE_SIZE = 512000
 # 1 column * 10k observations
 # * 11 utf-8 chars per average domain * 2 bytes per char + 4 * 10k buffer * 2 just bc 250 kb sounded small
 main_blueprint = Blueprint("main", __name__, template_folder="templates")
+
+
+def file_only_one_column(form, field):
+    file = field.data
+    file_bytes = file.read()
+
+    file_str = file_bytes.decode(guess_encoding(file_bytes))
+    file_io = io.StringIO(file_str)
+    reader = csv.reader(file_io)
+    first_line = next(reader)
+    if len(first_line) != 1:
+        raise ValidationError("CSV must be a single column of domain names")
 
 
 class UploadForm(FlaskForm):
@@ -44,6 +61,7 @@ class UploadForm(FlaskForm):
             FileRequired(),
             FileSize(MAX_FILE_SIZE, message="File cannot exceed 250kb"),
             FileAllowed(["csv"], "CSVs only"),
+            file_only_one_column,
         ],
     )
 

@@ -8,11 +8,12 @@ from usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
 from requests_html import HTMLSession
-from .helper_functions import is_valid_url
+from .helper_functions import *
 from .models import Job
 from depot.manager import DepotManager
 from app import db
 from flask import current_app
+import io
 
 
 class HiddenPrints:
@@ -91,11 +92,18 @@ def get_urls(input_file) -> list:
     """
 
     input_urls = []
-    for line in input_file.read().decode("UTF-8").splitlines():
-        if not re.match("(?:http|ftp|https)://", line):
-            input_urls.append("http://{}".format(line))
+    file_bytes = input_file.read()
+
+    file_str = file_bytes.decode(guess_encoding(file_bytes))
+
+    file_io = io.StringIO(file_str)
+    reader = csv.reader(file_io)
+    for line in reader:
+        domain = line[0]
+        if not re.match("(?:http|ftp|https)://", domain):
+            input_urls.append("http://{}".format(domain))
         else:
-            input_urls.append(line)
+            input_urls.append(domain)
     input_file.close()
 
     return input_urls

@@ -1,9 +1,7 @@
 import os
 from requests_html import HTMLSession
-
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ["csv"]
+import chardet
+import csv
 
 
 def is_valid_url(url: str) -> bool:
@@ -25,3 +23,12 @@ def is_valid_url(url: str) -> bool:
                 return False
         except:  # invalid domain, connection error
             return False
+
+
+def guess_encoding(encoded_bytes):
+    result = chardet.detect(encoded_bytes)
+    return result.get("encoding")
+
+
+def guess_csv_dialect(csv_string):
+    return csv.Sniffer().sniff(csv_string)
