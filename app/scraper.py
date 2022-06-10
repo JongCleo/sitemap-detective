@@ -93,13 +93,9 @@ def get_urls(input_file) -> list:
 
     input_urls = []
     input_file_bytes = input_file.read()
-    input_file._file.seek(0)
-
     deduced_encoding = guess_encoding(input_file_bytes)
-    print(f"deduced encoding: {deduced_encoding}")
 
     file_str = input_file_bytes.decode(deduced_encoding)
-    print(file_str)
     file_io = io.StringIO(file_str)
     reader = csv.reader(file_io)
     for line in reader:
