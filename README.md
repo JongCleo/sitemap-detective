@@ -10,6 +10,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Then install my fork of the `ultimate-sitemap-parser` package
+
+```
+pip install -e git+https://github.com/JongCleo/ultimate-sitemap-parser#egg=ultimate-sitemap-parser
+```
+
+Then copy and fill `sample-env.env` into a `.env` at the project root.
+
 ## Local Development
 
 run `./start.sh` from a bash terminal to start all services

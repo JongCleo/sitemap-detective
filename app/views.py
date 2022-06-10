@@ -38,13 +38,16 @@ main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 def file_only_one_column(form, field):
     file = field.data
-    deduced_encoding = guess_encoding(file.read())
+    file_bytes = file.read()
     file.seek(0)
-    file_str = file.read().decode(deduced_encoding)
 
+    deduced_encoding = guess_encoding(file_bytes)
+    file_str = file_bytes.decode(deduced_encoding)
     file_io = io.StringIO(file_str)
+
     reader = csv.reader(file_io)
     first_line = next(reader)
+
     if len(first_line) != 1:
         raise ValidationError("CSV must be a single column of domain names")
 

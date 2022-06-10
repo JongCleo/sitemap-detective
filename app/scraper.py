@@ -13,6 +13,7 @@ from .models import Job
 from depot.manager import DepotManager
 from app import db
 from flask import current_app
+import io
 
 
 class HiddenPrints:
@@ -91,8 +92,16 @@ def get_urls(input_file) -> list:
     """
 
     input_urls = []
+    input_file_bytes = input_file.read()
+    input_file._file.seek(0)
 
-    reader = csv.reader(input_file.read())
+    deduced_encoding = guess_encoding(input_file_bytes)
+    print(f"deduced encoding: {deduced_encoding}")
+
+    file_str = input_file_bytes.decode(deduced_encoding)
+    print(file_str)
+    file_io = io.StringIO(file_str)
+    reader = csv.reader(file_io)
     for line in reader:
         domain = line[0]
         if not re.match("(?:http|ftp|https)://", domain):
