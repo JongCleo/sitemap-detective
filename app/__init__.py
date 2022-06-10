@@ -134,20 +134,9 @@ def register_database(app):
 def setup_depots(app):
 
     depot_name = "all_csvs"
+    # storing on disk vs memory per https://github.com/amol-/depot/tree/master/examples/flask
+    depot_config = app.config.get("DEPOT_CONFIG")
 
-    if app.config.get("FLASK_ENV") == "development":
-        # storing on disk vs memory per https://github.com/amol-/depot/tree/master/examples/flask
-        depot_config = {"depot.storage_path": "./tmp/"}
-    else:
-        depot_config = {
-            "depot.backend": "depot.io.boto3.S3Storage",
-            "depot.endpoint_url": "https://storage.googleapis.com",
-            "depot.access_key_id": app.config.get("GOOGLE_CLOUD_STORAGE_ACCESS_KEY"),
-            "depot.secret_access_key": app.config.get(
-                "GOOGLE_CLOUD_STORAGE_SECRET_KEY"
-            ),
-            "depot.bucket": app.config.get("GOOGLE_CLOUD_STORAGE_BUCKET"),
-        }
     DepotManager.configure(depot_name, depot_config)
     # MWare to serve files
     app.wsgi_app = DepotManager.make_middleware(app.wsgi_app)

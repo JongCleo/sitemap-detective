@@ -23,7 +23,7 @@ class Config:
     GOOGLE_CLOUD_STORAGE_BUCKET = os.getenv("GOOGLE_CLOUD_STORAGE_BUCKET")
 
     ## Dababase
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     ## Email
@@ -36,7 +36,15 @@ class DevelopmentConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(base_dir, "database.db")
+    DEPOT_CONFIG = {"depot.storage_path": "./tmp/"}
 
 
 class ProductionConfig(Config):
-    pass
+    DEBUG = False
+    DEPOT_CONFIG = {
+        "depot.backend": "depot.io.boto3.S3Storage",
+        "depot.endpoint_url": "https://storage.googleapis.com",
+        "depot.access_key_id": os.getenv("GOOGLE_CLOUD_STORAGE_ACCESS_KEY"),
+        "depot.secret_access_key": os.getenv("GOOGLE_CLOUD_STORAGE_SECRET_KEY"),
+        "depot.bucket": os.getenv("GOOGLE_CLOUD_STORAGE_BUCKET"),
+    }
