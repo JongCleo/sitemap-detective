@@ -88,16 +88,12 @@ def process_job(job_id: str):
 def get_urls(input_file) -> list:
     """Parses the file-to-be-processed into a list of urls
     Args:
-        input_file: StoredFile object from depot pckg
+        input_file: StoredFile object from depot pckg which extends IOBase
     """
 
     input_urls = []
-    file_bytes = input_file.read()
 
-    file_str = file_bytes.decode(guess_encoding(file_bytes))
-
-    file_io = io.StringIO(file_str)
-    reader = csv.reader(file_io)
+    reader = csv.reader(input_file.read())
     for line in reader:
         domain = line[0]
         if not re.match("(?:http|ftp|https)://", domain):

@@ -38,9 +38,10 @@ main_blueprint = Blueprint("main", __name__, template_folder="templates")
 
 def file_only_one_column(form, field):
     file = field.data
-    file_bytes = file.read()
+    deduced_encoding = guess_encoding(file.read())
+    file.seek(0)
+    file_str = file.read().decode(deduced_encoding)
 
-    file_str = file_bytes.decode(guess_encoding(file_bytes))
     file_io = io.StringIO(file_str)
     reader = csv.reader(file_io)
     first_line = next(reader)
