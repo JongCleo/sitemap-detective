@@ -13,7 +13,6 @@ from .models import Job
 from depot.manager import DepotManager
 from app import db
 from flask import current_app
-import io
 
 
 class HiddenPrints:
