@@ -141,7 +141,7 @@ cython_debug/
 output/
 
 .vscode/
-
+ 
 *.DS_Store
 
 *.db
@@ -149,4 +149,3 @@ output/
 
 tmp/
 misc/
-prod.env
