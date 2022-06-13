@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: app # bad practice for scalability, but makes it easier to ID for quick commands
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    command: flask run
+    # gunicorn to place heartbeat file in a memory-only part of the fs ie. dev/shm because tmpfs doesn't exist in docker by default
+    image: sitemap_detective_web_app
+    # this volume is used to map the files and folders on the host to the container
+    # so if we change code on the host, code in the docker container will also be changed
+    volumes:
+      - ./:/project/
+    ports:
+      - 5000:5000
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  worker:
+    container_name: worker
+    # Reuses the image built in the app container
+    image: sitemap_detective_web_app
+    command: celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
+    volumes:
+      - ./:/project/
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  flower:
+    container_name: flower
+    image: sitemap_detective_web_app
+    command: celery --app celery_worker.celery flower --port=5555
+    volumes:
+      - ./:/project/
+    env_file:
+      - .env
+    ports:
+      - 5555:5555
+    depends_on:
+      - redis
+      - worker
+
+  redis:
+    container_name: redis
+    image: redis:6.2-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --save 20 1 --loglevel warning
