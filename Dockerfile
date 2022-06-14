@@ -15,6 +15,16 @@ RUN apt-get update \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*   
 
+# # install google chrome
+# RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+# RUN sh -c 'echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+# RUN apt-get -y update
+# RUN apt-get install -y google-chrome-stable
+# # install chromedriver
+# RUN apt-get install -yqq unzip
+# RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux64.zip
+# RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 # We don't want to run our application as root if it is not strictly necessary, even in a container.
 # Create a user and a group called 'app' to run the processes.
 # A system user is sufficient and we do not need a home.
@@ -28,7 +38,6 @@ RUN pip3 install --upgrade pip
 COPY ./requirements.txt ./requirements.txt
 RUN pip3 install -r requirements.txt
 COPY ./usp/ /usr/local/lib/python3.8/usp/
-RUN python3.8 -m pip install requests-html
 
 # Create Log folder
 RUN mkdir -p logs

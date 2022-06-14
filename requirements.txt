@@ -62,7 +62,6 @@ pytz==2022.1
 PyYAML==6.0
 redis==4.2.2
 requests==2.27.1
-requests-html==0.10.0
 s3transfer==0.5.2
 sendgrid==6.9.7
 six==1.16.0
