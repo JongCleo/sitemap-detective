@@ -7,7 +7,7 @@ import requests
 from custom_usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
-from custom_requests_html.requests_html import HTMLSession
+from requests_html import HTMLSession
 from .helper_functions import *
 from .models import Job
 from depot.manager import DepotManager

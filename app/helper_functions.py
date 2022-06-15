@@ -1,4 +1,4 @@
-from custom_requests_html.requests_html import HTMLSession
+from requests_html import HTMLSession
 import chardet
 import csv
 import subprocess

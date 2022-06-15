@@ -2,8 +2,7 @@ from flask.cli import FlaskGroup
 from app import create_app, db
 import os
 import shutil
-from custom_requests_html.requests_html import HTMLSession
-from app.helper_functions import get_chromium_configuration
+from requests_html import HTMLSession
 
 cli = FlaskGroup(create_app)
 
