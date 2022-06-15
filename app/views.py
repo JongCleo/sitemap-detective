@@ -146,18 +146,15 @@ def get_job(job_id):
     # Source: https://stackoverflow.com/questions/9034091/how-to-check-task-status-in-celery
     try:
         job = Job.query.get(job_id)
-        status = process_job.AsyncResult(job.celery_id).status
     except Exception as error:
-        current_app.logger.info(f"Job ID: {job_id} does not exist")
+        current_app.logger.info(f"Job ID: {job_id} does not exist, {error}")
         return render_template("404.html"), HTTPStatus.NOT_FOUND
 
     # Build response object
     job_information = JobSchema().dump(job)
-
     job_information.update(
         {
             "created_at": job.created_at,
-            "status": status,
             "output_file_name": "N/A"
             if job.output_file is None
             else job.output_file.filename,  # flattening bc Jinja can't parse nested props
