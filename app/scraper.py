@@ -4,10 +4,10 @@ import billiard as mp
 import csv
 import uuid
 import requests
-from usp.tree import sitemap_tree_for_homepage
+from custom_usp.tree import sitemap_tree_for_homepage
 import logging
 from urllib.parse import urlparse
-from requests_html import HTMLSession
+from custom_requests_html.requests_html import HTMLSession
 from .helper_functions import *
 from .models import Job
 from depot.manager import DepotManager
@@ -200,7 +200,11 @@ def find_terms_on_homepage(site: str, term_list: list, case_sensitive: bool) -> 
     current_app.logger.info("Searching homepage for keywords...")
     term_exist_list = []
 
-    with HTMLSession() as session:
+    browser_args, pyppeteer_args = get_chromium_configuration()
+
+    with HTMLSession(
+        browser_args=browser_args, pyppeteer_args=pyppeteer_args
+    ) as session:
         try:
             r = session.get(site, headers={"User-Agent": "Mozilla/5.0"})
         except requests.exceptions.RequestException as e:
