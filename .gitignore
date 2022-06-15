@@ -151,3 +151,4 @@ tmp/
 misc/
 prod.env
 usp/
+*.env
