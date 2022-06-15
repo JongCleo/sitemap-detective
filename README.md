@@ -1,33 +1,15 @@
 # Website Filter/Validator/ Name TBD
 
-## Setup
-
-Clone the repository, cd into it and run
-
-```
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-Then install my fork of the `ultimate-sitemap-parser` package
-
-```
-pip install -e git+https://github.com/JongCleo/ultimate-sitemap-parser#egg=ultimate-sitemap-parser
-```
-
-Then copy and fill `sample-env.env` into a `.env` at the project root.
-
 ## Local Development
 
-run `./start.sh` from a bash terminal to start all services
-and run `./stop.sh` to stop all services
+run `docker-compose -f docker-compose-dev.yml up --build`
 
-Flask server is at http://localhost:5000
+Flask server is at http://localhost:5050
 Flower (Worker diagnostics) is at http://localhost:5555
 
 ## Test commmands
 
+SSH into the app, flower or worker container and run
 `pytest {path/module_name.py}` to test a module
 add the `-v` flag for more verbosity or `-q` for less
 
@@ -38,7 +20,7 @@ add the `-v` flag for more verbosity or `-q` for less
 
 ## Production Simulation
 
-1. Copy your `.env` into a `prod.env`
+1. Copy `.env` into `prod.env`
 2. Change `CONFIG_TYPE=config.ProductionConfig` and `FLASK_ENV=production` along
 3. Change other env vars (just google and sql_db_uri at the moment) to use production/cloud based versions
 
