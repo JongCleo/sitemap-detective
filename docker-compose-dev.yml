@@ -14,11 +14,12 @@ services:
     volumes:
       - ./:/project/
     ports:
-      - 5000:5000
+      - 5050:5050
     env_file:
-      - .env
+      - dev.env
     depends_on:
       - redis
+    platform: linux/amd64 # need to specify otherwise google chrome download fails bc m1 runs arm64
 
   worker:
     container_name: worker
@@ -28,9 +29,10 @@ services:
     volumes:
       - ./:/project/
     env_file:
-      - .env
+      - dev.env
     depends_on:
       - redis
+    platform: linux/amd64
 
   flower:
     container_name: flower
@@ -39,12 +41,13 @@ services:
     volumes:
       - ./:/project/
     env_file:
-      - .env
+      - dev.env
     ports:
       - 5555:5555
     depends_on:
       - redis
       - worker
+    platform: linux/amd64
 
   redis:
     container_name: redis

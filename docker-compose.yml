@@ -15,6 +15,7 @@ services:
       - 5050:5050
     env_file:
       - ./prod.env
+    platform: linux/amd64 # need to specify otherwise google chrome download fails bc m1 runs arm64
     depends_on:
       - redis
 
@@ -25,6 +26,7 @@ services:
     command: celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
     env_file:
       - ./prod.env
+    platform: linux/amd64
     depends_on:
       - redis
 
@@ -34,6 +36,7 @@ services:
     command: celery --app celery_worker.celery flower --port=5555
     env_file:
       - ./prod.env
+    platform: linux/amd64
     ports:
       - 5555:5555
     depends_on:
