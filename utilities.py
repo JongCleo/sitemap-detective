@@ -3,7 +3,7 @@ from app import create_app, db
 import os
 import shutil
 from custom_requests_html.requests_html import HTMLSession
-from app.helper_functions import get_chromium_executable_path
+from app.helper_functions import get_chromium_configuration
 
 cli = FlaskGroup(create_app)
 
@@ -15,19 +15,24 @@ def create_db():
     db.session.commit()
 
 
-@cli.command("test_chromium")
+@cli.command("download_chromium")
 def download_chromium():
-    browser_args = ["--headless", "--no-sandbox", "--disable-dev-shm-usage"]
-    pyppeteer_args = {}
-    if executable_path := get_chromium_executable_path():
-        pyppeteer_args["executablePath"] = executable_path
+    from pyppeteer.launcher import Launcher
 
-    with HTMLSession(
-        browser_args=browser_args, pyppeteer_args=pyppeteer_args
-    ) as session:
-        r = session.get("https://google.com", headers={"User-Agent": "Mozilla/5.0"})
-        r.html.render(timeout=15)
-        print(r.html)
+    " ".join(Launcher().cmd)
+
+
+@cli.command("test_chromium")
+def test_chromium():
+    browser_args = [
+        "--headless",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--single-process",
+    ]
+    with HTMLSession(browser_args=browser_args) as session:
+        r = session.get("http://toriihq.com", headers={"User-Agent": "Mozilla/5.0"})
+        r.html.render(timeout=25)
 
 
 @cli.command("clean_temp_dir")

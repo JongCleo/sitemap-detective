@@ -200,10 +200,13 @@ def find_terms_on_homepage(site: str, term_list: list, case_sensitive: bool) -> 
     current_app.logger.info("Searching homepage for keywords...")
     term_exist_list = []
 
-    browser_args, pyppeteer_args = get_chromium_configuration()
-
     with HTMLSession(
-        browser_args=browser_args, pyppeteer_args=pyppeteer_args
+        browser_args=[
+            "--headless",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--single-process",
+        ]
     ) as session:
         try:
             r = session.get(site, headers={"User-Agent": "Mozilla/5.0"})
@@ -213,7 +216,7 @@ def find_terms_on_homepage(site: str, term_list: list, case_sensitive: bool) -> 
                 term_exist_list.append("N/A")
             return term_exist_list
         try:
-            r.html.render(timeout=15)
+            r.html.render(timeout=25)
             for term in term_list:
                 if term in r.html.html:
                     term_exist_list.append("True")
