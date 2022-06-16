@@ -8,7 +8,7 @@ services:
       dockerfile: ./Dockerfile
     command: gunicorn --worker-tmp-dir /dev/shm --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:5050 "application:create_app()"
     # gunicorn to place heartbeat file in a memory-only part of the fs ie. dev/shm because tmpfs doesn't exist in docker by default
-    image: sitemap_detective_web_app
+    image: 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest
     # this volume is used to map the files and folders on the host to the container
     # so if we change code on the host, code in the docker container will also be changed
     ports:
@@ -22,7 +22,7 @@ services:
   worker:
     container_name: worker
     # Reuses the image built in the app container
-    image: sitemap_detective_web_app
+    image: 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest
     command: celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
     env_file:
       - ./prod.env
@@ -32,7 +32,7 @@ services:
 
   flower:
     container_name: flower
-    image: sitemap_detective_web_app
+    image: 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest
     command: celery --app celery_worker.celery flower --port=5555
     env_file:
       - ./prod.env
