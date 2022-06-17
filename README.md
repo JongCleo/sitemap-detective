@@ -9,6 +9,9 @@ For example, A VC firm interested in losing lots of money could provide a list o
 Create a `dev.env` file from `sample.env`
 
 ```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 docker-compose -f docker-compose-dev.yml up --build
 ```
 
@@ -35,7 +38,7 @@ Add the `-v` flag for verbose output or `-q` for less
 To build fresh images and start containers:
 
 ```
-docker-compose up -d --build
+docker-compose up -f docker-compose-prod.yml -d --build
 ```
 
 This project's root folder is mounted into the container so your code changes apply automatically.
@@ -55,6 +58,10 @@ docker-compose down
 ## Production notes
 
 - download and configure AWS CLI
-- Create Docker image and push to ECR [link](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html)
-- Run `docker buildx build -t --platform linux/amd64 sitemap-detective .`
-- Run `docker compose --context myecscontext up`
+- create ecs context in docker, and switch to context
+- [instructions](https://us-east-1.console.aws.amazon.com/ecr/repositories?region=us-east-1)
+- 0. Login `aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 232672370905.dkr.ecr.us-east-1.amazonaws.com`
+- 1. Update Image `docker buildx build -t --platform linux/amd64 sitemap-detective .`
+- 2. Dupe base image into ECR compatible img `docker tag sitemap-detective:latest 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest`
+- 3. Push to ECR `docker push 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest`
+- 4. Deploy `docker compose --context myecscontext up`
