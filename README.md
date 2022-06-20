@@ -4,30 +4,46 @@ Sitemap Detective is a microsaas app for lead filtering. You give it a list of d
 
 For example, A VC firm interested in losing lots of money could provide a list of startup domains and search for "web3" or "blockchain".
 
-## Local Development
+## Setup
 
 Create a `dev.env` file from `sample.env`
+
+1. Set up Virtual Environment and install dependencies
 
 ```
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-docker-compose -f docker-compose-dev.yml up --build
 ```
+
+2. Build and run local docker containers with `docker-compose`
+
+`docker-compose -f docker-compose-dev.yml up --build`
 
 Flask server is at http://localhost:5050
 Flower (Worker diagnostics) is at http://localhost:5555
 
-## Test commands
+## Development Flow
 
-SSH into the app, flower or worker container and run <br>
-`pytest {path/module_name.py}` to test a module. <br>
-Add the `-v` flag for verbose output or `-q` for less
+1. Write code (in docker container)
 
-### Test Shortcuts
+2. Update requirements (if applicable)
+   `pip freeze -l > requirements.txt`
 
-`pytest tests/unit/test_scraper.py`
-`pytest tests/functional/test_views.py`
+3. Build and run production containers with
+   `docker-compose -f docker-compose-prod.yml up --build`
+   Confirm it can still build and run apps a) without mounting volumes b) using gunicorn in front of flask
+
+4. Run tests in production container
+   SSH into the app, flower or worker container and run <br>
+   `pytest {path/module_name.py}` to test a module. <br>
+   Add the `-v` flag for verbose output or `-q` for less
+   `pytest tests/unit/test_scraper.py`
+   `pytest tests/functional/test_views.py`
+
+5. Push to main branch (yes this is super monkey, will evolve to something more sophisticated later)
+
+6. Manual or Triggered (TBD) Workflow to deploy
 
 ## Production Simulation
 
