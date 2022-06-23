@@ -16,12 +16,20 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Build and run local docker containers with `docker-compose`
+2. Build local Docker image
 
-`docker-compose -f docker-compose-dev.yml up --build`
+`docker-compose -f docker-compose-dev.yml build`
+
+3. Run `./start.sh`
+
+It runs the worker and flower diagnostics locally on the host machine but uses Docker containers to run the flask app and redis. This is the best compromise I could do to simulate production conditions while keeping the ability to hot reload.
+
+The root folder is also mounted into the container so your code changes apply automatically in the flask container as well.
 
 Flask server is at http://localhost:5050
 Flower (Worker diagnostics) is at http://localhost:5555
+
+Use `./stop.sh` in a different terminal to shutdown everything.
 
 ## Development Flow
 
@@ -30,54 +38,30 @@ Flower (Worker diagnostics) is at http://localhost:5555
 2. Update requirements (if applicable)
    `pip freeze -l > requirements.txt`
 
-3. Build and run production containers with
+3. Create Production Env File
+   a) Copy `.env` into `prod.env`
+   b) Change `CONFIG_TYPE=config.ProductionConfig` and `FLASK_ENV=production` along
+   c) Change other env vars (just google and sql_db_uri at the moment) to use production/cloud based versions
+
+4. Build and run production containers with
    `docker-compose -f docker-compose-prod.yml up --build`
    Confirm it can still build and run apps a) without mounting volumes b) using gunicorn in front of flask
 
-4. Run tests in production container
+5. Run tests in production container
    SSH into the app, flower or worker container and run <br>
    `pytest {path/module_name.py}` to test a module. <br>
    Add the `-v` flag for verbose output or `-q` for less
    `pytest tests/unit/test_scraper.py`
    `pytest tests/functional/test_views.py`
 
-5. Push to main branch (yes this is super monkey, will evolve to something more sophisticated later)
+6. Push to main branch (yes this is super monkey, will evolve to something more sophisticated later)
 
-6. Manual or Triggered (TBD) Workflow to deploy
+7. Manual or Triggered (TBD) Workflow to deploy
 
-## Production Simulation
-
-1. Copy `.env` into `prod.env`
-2. Change `CONFIG_TYPE=config.ProductionConfig` and `FLASK_ENV=production` along
-3. Change other env vars (just google and sql_db_uri at the moment) to use production/cloud based versions
-
-To build fresh images and start containers:
-
-```
-docker-compose up -f docker-compose-prod.yml -d --build
-```
-
-This project's root folder is mounted into the container so your code changes apply automatically.
+## Other Notes
 
 To get the logs from a container use the following command:
 
 ```
 docker-compose logs -f [container_name]
 ```
-
-To shutdown service use the flag `--rmi all` to clear everthing or just `-v` for the volumes
-
-```
-docker-compose down
-```
-
-## Production notes
-
-- download and configure AWS CLI
-- create ecs context in docker, and switch to context
-- [instructions](https://us-east-1.console.aws.amazon.com/ecr/repositories?region=us-east-1)
-- 0. Login `aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 232672370905.dkr.ecr.us-east-1.amazonaws.com`
-- 1. Update Image `docker buildx build -t --platform linux/amd64 sitemap-detective .`
-- 2. Dupe base image into ECR compatible img `docker tag sitemap-detective:latest 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest`
-- 3. Push to ECR `docker push 232672370905.dkr.ecr.us-east-1.amazonaws.com/sitemap-detective:latest`
-- 4. Deploy `docker compose --context myecscontext up`

@@ -6,7 +6,7 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
-    command: flask run
+    command: flask run -p 5050 -h 0.0.0.0
     # gunicorn to place heartbeat file in a memory-only part of the fs ie. dev/shm because tmpfs doesn't exist in docker by default
     image: sitemap-detective
     # this volume is used to map the files and folders on the host to the container
@@ -20,34 +20,6 @@ services:
     depends_on:
       - redis
     platform: linux/amd64 # need to specify otherwise google chrome download fails bc m1 runs arm64
-
-  worker:
-    container_name: worker
-    # Reuses the image built in the app container
-    image: sitemap-detective
-    command: watchmedo auto-restart -d 'app/' -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
-    volumes:
-      - ./:/project/
-    env_file:
-      - dev.env
-    depends_on:
-      - redis
-    platform: linux/amd64
-
-  flower:
-    container_name: flower
-    image: sitemap-detective
-    command: watchmedo auto-restart -d 'app/' -p '*.py' -- celery --app celery_worker.celery flower --port=5555
-    volumes:
-      - ./:/project/
-    env_file:
-      - dev.env
-    ports:
-      - 5555:5555
-    depends_on:
-      - redis
-      - worker
-    platform: linux/amd64
 
   redis:
     container_name: redis
