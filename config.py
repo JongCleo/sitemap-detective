@@ -11,8 +11,8 @@ class Config:
     FLASK_ENV = os.getenv("FLASK_ENV")
 
     # Celery Workers
-    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-    RESULT_BACKEND = os.getenv("RESULT_BACKEND")
+    CELERY_BROKER_URL = os.getenv("REDIS_URL")
+    RESULT_BACKEND = os.getenv("REDIS_URL")
 
     ## Object Store
     GOOGLE_CLOUD_STORAGE_ACCESS_KEY = os.getenv("GOOGLE_CLOUD_STORAGE_ACCESS_KEY")
