@@ -39,6 +39,7 @@ RUN adduser --system --group app \
   && chown -R app:app /project \
   # this also for requests_html module
   && chown -R app:app /home/app
+  && chmod +x start_worker.sh
   
 # Subsequent commands, either in this Dockerfile or in a
 # docker-compose.yml, will run as user 'app'
