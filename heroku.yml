@@ -1,15 +1,15 @@
 build:
   docker:
-    sitemap-detective: Dockerfile
+    web: Dockerfile
 run:
-  server:
+  web:
     command:
       - gunicorn --worker-tmp-dir /dev/shm --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:5050 "application:create_app()"
-    image: sitemap-detective
+    image: web
   worker:
     command:
       - celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
-    image: sitemap-detective
+    image: web
 # release:
 # image: sitemap-detective
 # use this to run tasks before new releases, like a migration

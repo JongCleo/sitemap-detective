@@ -44,7 +44,7 @@ Use `./stop.sh` in a different terminal to shutdown everything.
    c) Change other env vars (just google and sql_db_uri at the moment) to use production/cloud based versions
 
 4. Build and run production containers with
-   `docker-compose -f docker-compose-prod.yml up --build`
+   `docker-compose up --build`
    Confirm it can still build and run apps a) without mounting volumes b) using gunicorn in front of flask
 
 5. Run tests in production container
