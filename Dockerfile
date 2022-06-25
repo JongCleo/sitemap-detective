@@ -38,7 +38,7 @@ RUN adduser --system --group app \
   # Hand everything over to the 'app' user in the 'app' group
   && chown -R app:app /project \
   # this also for requests_html module
-  && chown -R app:app /home/app
+  && chown -R app:app /home/app \
   && chmod +x start_worker.sh
   
 # Subsequent commands, either in this Dockerfile or in a
