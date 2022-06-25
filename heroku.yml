@@ -4,7 +4,7 @@ build:
 run:
   web:
     command:
-      - gunicorn --worker-tmp-dir /dev/shm --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:5050 "application:create_app()"
+      - gunicorn --worker-tmp-dir /dev/shm --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:$PORT "application:create_app()"
     image: web
   worker:
     command:
