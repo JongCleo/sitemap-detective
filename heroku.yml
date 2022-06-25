@@ -3,10 +3,12 @@ build:
     sitemap-detective: Dockerfile
 run:
   server:
-    command: gunicorn --worker-tmp-dir /dev/shm --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:5050 "application:create_app()"
+    command:
+      - gunicorn --worker-tmp-dir /dev/shm --workers=2 --threads=4 --worker-class=gthread --bind 0.0.0.0:5050 "application:create_app()"
     image: sitemap-detective
   worker:
-    command: celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
+    command:
+      - celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
     image: sitemap-detective
 # release:
 # image: sitemap-detective
