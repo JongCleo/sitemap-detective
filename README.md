@@ -69,5 +69,5 @@ docker-compose logs -f [container_name]
 ```
 
 ```
-heroku logs -a sitemap-detective
+heroku logs -a sitemap-detective --tail
 ```
