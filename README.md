@@ -1,4 +1,5 @@
 # Sitemap Detective
+
 https://sitemap-detective.herokuapp.com/
 
 Sitemap Detective is a microsaas app for lead filtering. You give it a list of domains and keywords you want to look for in the domain's sitemap and on-page content. It gives a csv back indicating which domains matched your search criteria.
@@ -65,4 +66,8 @@ To get the logs from a container use the following command:
 
 ```
 docker-compose logs -f [container_name]
+```
+
+```
+heroku logs -a sitemap-detective
 ```

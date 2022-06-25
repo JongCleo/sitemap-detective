@@ -8,7 +8,7 @@ run:
     image: web
   worker:
     command:
-      - celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
+      - ./start_worker.sh
     image: web
 # release:
 # image: sitemap-detective

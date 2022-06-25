@@ -46,4 +46,4 @@ USER app
 
 # Force Pyppeteer to download its preferred version of chromium
 # No luck with debian release of chromium and regular chrome
-RUN python3 utilities.py download_chromium
+#RUN python3 utilities.py download_chromium
