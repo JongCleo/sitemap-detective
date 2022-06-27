@@ -23,7 +23,7 @@ docker-compose -f docker-compose-dev.yml up -d
 # overwrite the celery ENV vars so Flask Container can talk to Redis Container
 # and celery/flower runnning on the Host machine can talk to Redis Container
 export REDIS_URL=redis://localhost:6379
-watchmedo auto-restart -d 'app/' -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log &
+watchmedo auto-restart -d 'app/' -p '*.py' -- celery -A celery_worker.celery worker --loglevel=info &
 watchmedo auto-restart -d 'app/' -p '*.py' -- celery --app celery_worker.celery flower --port=5555 &
 
 # open browsers
