@@ -1,7 +1,9 @@
 from requests_html import HTMLSession
 import chardet
 import csv
-import subprocess
+import sys
+import os
+import logging
 
 
 def is_valid_url(url: str) -> bool:
@@ -32,3 +34,17 @@ def guess_encoding(encoded_bytes):
 
 def guess_csv_dialect(csv_string):
     return csv.Sniffer().sniff(csv_string)
+
+
+class HiddenPrints:
+    """context provider to prevent the Ultimate Sitemap Parser library from spamming stdout"""
+
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+        logging.disable(logging.CRITICAL)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
+        logging.disable(logging.NOTSET)
