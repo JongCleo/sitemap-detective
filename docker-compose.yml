@@ -23,7 +23,7 @@ services:
     container_name: worker
     # Reuses the image built in the app container
     image: sitemap-detective
-    command: celery -A celery_worker.celery worker --loglevel=info --logfile=logs/celery.log
+    command: ./start_worker.sh
     env_file:
       - ./prod.env
     platform: linux/amd64

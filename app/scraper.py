@@ -6,8 +6,8 @@ import requests
 from urllib.parse import urlparse
 from requests_html import HTMLSession
 from flask import current_app
+from sqlalchemy import exc
 import io
-
 from custom_usp.tree import sitemap_tree_for_homepage
 from app import db
 from . import celery  # get worker instance
@@ -167,9 +167,10 @@ def finish_job(self, db_job: Job, input_filename: str, headers, result_list) -> 
         with open(temp_file, "rb") as f:
             db_job.output_file = f
             db.session.commit()
-    except Exception as exc:
-        current_app.logger.error(f"Failed to write to db {exc}")
-        self.retry(countdown=10, exc=exc)
+    except (exc.SQLAlchemyError, exc.OperationalError) as e:
+        current_app.logger.error(f"Failed to write to db {e}")
+        db.session.rollback()
+        self.retry(countdown=10, exc=e)
 
     try:
         os.remove(temp_file)
