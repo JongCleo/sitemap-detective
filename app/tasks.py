@@ -19,6 +19,8 @@ class EmailType(str, enum.Enum):
     failed = "failed"
 
 
+# This is anti pattern-ish as the core logic should be implemented in its own fncs
+# Tasks' main concerns are serialization, message headers, retries..
 @celery.task(name="process_job")
 def process_job(job_id):
     """Checks a list of domains for the existence of certain pages and keywords in each domains' sitemaps"""

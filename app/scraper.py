@@ -149,8 +149,8 @@ def find_pages_in_sitemap(site: str, page_list: list, exact_page: bool) -> dict:
     return page_exist_dict
 
 
-@celery.task(name="finish_job")
-def finish_job(db_job: Job, input_filename: str, headers, result_list) -> None:
+@celery.task(name="finish_job", bind=True, max_retries=3)
+def finish_job(self, db_job: Job, input_filename: str, headers, result_list) -> None:
     # Parse pickled objects
     headers = list(headers)
     result_list = [result.split(",") for result in list(result_list)]
@@ -167,8 +167,9 @@ def finish_job(db_job: Job, input_filename: str, headers, result_list) -> None:
         with open(temp_file, "rb") as f:
             db_job.output_file = f
             db.session.commit()
-    except Exception as e:
-        current_app.logger.error(f"Failed to write to db {e}")
+    except Exception as exc:
+        current_app.logger.error(f"Failed to write to db {exc}")
+        self.retry(countdown=10, exc=exc)
 
     try:
         os.remove(temp_file)
