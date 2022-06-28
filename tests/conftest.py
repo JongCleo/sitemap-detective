@@ -4,6 +4,11 @@ from app import create_app, db as database
 from app.models import Job, User
 from tests import helpers
 from flask import template_rendered
+from dotenv import load_dotenv
+import os
+
+base_dir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(base_dir, "../dev.env"))
 
 
 @pytest.fixture(scope="session")
@@ -61,6 +66,14 @@ def job(user, db):
     db.session.add(job)
     db.session.commit()
     return job
+
+
+@pytest.fixure(scope="session")
+def celery_config():
+    return {
+        "broker_url": os.getenv("REDIS_URL"),
+        "result_backend": os.getenv("REDIS_URL"),
+    }
 
 
 # source: https://stackoverflow.com/questions/57006104/how-to-test-flask-view-context-and-templates-using-pytest

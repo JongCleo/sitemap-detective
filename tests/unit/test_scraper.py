@@ -1,7 +1,6 @@
 from app.scraper import process_job
-from app.models import Job, User
+from app.models import Job
 from depot.manager import DepotManager
-import os
 
 
 def test_small_sample(job):
