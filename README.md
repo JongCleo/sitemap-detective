@@ -6,6 +6,8 @@ Sitemap Detective is a microsaas app for lead filtering. You give it a list of d
 
 For example, A VC firm interested in losing lots of money could provide a list of startup domains and search for "web3" or "blockchain".
 
+![ScreenShot](/app/static/appscreenshot.png)
+
 ## Setup
 
 Create a `dev.env` file from `sample.env`
