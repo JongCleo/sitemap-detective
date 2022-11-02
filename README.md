@@ -8,6 +8,8 @@ For example, A VC firm interested in losing lots of money could provide a list o
 
 ![ScreenShot](/app/static/appscreenshot.png)
 
+![ScreenShot](/app/static/architecture.png)
+
 ## Setup
 
 Create a `dev.env` file from `sample.env`
